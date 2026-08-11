@@ -906,6 +906,7 @@ const state = {
   responseOpen: false, // split visible
   hasResponse: false,  // a response exists (open or collapsed)
   cached: false,       // current response is the cached example
+  cachedQ: "",         // which example card it came from
   runsLeft: 4
 };
 
@@ -959,25 +960,115 @@ function setChips(stale) {
   swapChips();
 }
 
-/* ===== Canned response, rendered smart-open ===== */
+/* ===== Canned responses, rendered smart-open =====
+   Result types are not a parameter: Google reads the query and the payload
+   changes shape with it. So the query picks the payload here too. The block a
+   query earns arrives open, because it is the answer to "what did asking this
+   get me", and it carries the annotation the reader would want next. Only the
+   subject of the query is ever interpolated. Everything a fold hides is field
+   structure, so no leftover noun can attach itself to a query someone typed. */
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+const K = k => `<span class="k">"${k}"</span>`,
+      S = v => `<span class="s">"${esc(v)}"</span>`,
+      N = v => `<span class="n">${v}</span>`;
+const wiki = s => "https://en.wikipedia.org/wiki/" + encodeURIComponent(s.split(/\s+/).map(cap).join("_"));
+/* The subject is the query with its cue words taken out: "Lakers last game"
+   asks about the Lakers, and every value built from it should say so. */
+const subject = (q, cues) =>
+  q.replace(cues, " ").replace(/\s+/g, " ").trim().replace(/^(the|a|an) /i, "") || q;
+
+/* A folded key: the summary line, plus the body it hides. */
+function fold(id, key, tail, hint, body) {
+  return `<div class="indent1 fold" data-t="${id}">▸ ${K(key)}: ${tail} <span class="hint">${hint}</span></div>`
+       + `<div class="indent2 hidden" data-b="${id}">${body}</div>`;
+}
+/* An open object: one field per line, annotated on the way in. */
+function openBlock(key, hint, lines) {
+  return `<div class="indent1">▾ ${K(key)}: { <span class="hint">${hint}</span></div>`
+       + lines.map(l => `<div class="indent2">${l}</div>`).join("")
+       + `<div class="indent1">},</div>`;
+}
+
+/* First match wins, so the cues run from most specific to least. */
+const SHAPES = [
+  {
+    id: "sports",
+    test: q => /\b(games?|scores?|standings|fixtures?|schedules?|matches)\b/i.test(q),
+    cues: /\b(last|next|latest|recent|final|tonight|games?|scores?|standings|fixtures?|schedules?|matches|results?)\b/gi,
+    result: s => [`${s} Scores, Stats and Highlights`, `https://www.espn.com/search/_/q/${encodeURIComponent(s)}`],
+    lead: (s, q) => openBlock("sports_results", "the fixture Google put above the results", [
+      `${K("type")}: ${S("team_sport")},`,
+      `${K("title")}: ${S(s)},`,
+      `${K("game_spotlight")}: { ${K("status")}: ${S(/\b(last|latest|final|scores?|results?)\b/i.test(q) ? "Final" : "Scheduled")}, ${K("teams")}: [ … ] }`
+    ])
+  },
+  {
+    id: "finance",
+    test: q => /\b(price|stocks?|quote|shares|ticker|futures|market cap|chart)\b/i.test(q)
+            || /^[A-Z.]{2,6}$/.test(q.trim()),
+    cues: /\b(price|stocks?|quote|shares|ticker|futures|chart|market cap|today|now)\b/gi,
+    result: s => [`${s.toUpperCase()} Quote`, `https://finance.yahoo.com/lookup?s=${encodeURIComponent(s)}`],
+    lead: s => openBlock("answer_box", "the quote Google put above the results", [
+      `${K("type")}: ${S("finance_results")},`,
+      `${K("stock")}: ${S(s.toUpperCase())},`,
+      `${K("price")}: ${N("2046.9")}, ${K("currency")}: ${S("USD")},`,
+      `${K("price_change")}: { ${K("percentage")}: ${N("0.23")}, ${K("is_up")}: ${N("true")} }`
+    ])
+  },
+  {
+    id: "answer",
+    test: q => /\b(hours|open|opening|closing|what|what's|who|when|where|why|how)\b/i.test(q),
+    cues: /\b(what is|what's|whats|who is|when is|where is|how much|how many|how to|why is|opening|closing|open|hours|times?)\b/gi,
+    result: s => [`${cap(s)} - Wikipedia`, wiki(s)],
+    /* Hours get their own answer box type; anything else Google answers with a
+       featured snippet, which is the same key wearing a different shape. */
+    lead: (s, q) => openBlock("answer_box", "Google answered inline, above the results",
+      /\b(hours|open|closing)\b/i.test(q)
+        ? [ `${K("type")}: ${S("open_hours")},`,
+            `${K("title")}: ${S(cap(s))},`,
+            `${K("time")}: ${S("10 AM–4:30 PM")},`,
+            `${K("open_hours")}: [ … ]` ]
+        : [ `${K("type")}: ${S("organic_result")},`,
+            `${K("answer")}: ${S("…")},`,
+            `${K("organic_result")}: { ${K("title")}: … , ${K("link")}: … }` ])
+  },
+  {
+    id: "knowledge",
+    test: () => true,
+    cues: /\b(wiki|wikipedia|info|about)\b/gi,
+    result: s => [`${cap(s)} - Wikipedia`, wiki(s)],
+    lead: s => openBlock("knowledge_graph", "the entity panel Google matched", [
+      `${K("kgmid")}: ${S("/m/0f4l2s")},`,
+      `${K("title")}: ${S(cap(s))},`,
+      `${K("type")}: ${S("Topic")},`,
+      `${K("description")}: ${S(cap(s) + " …")}`
+    ])
+  }
+];
+
 function renderJson(q) {
-  const title = q ? cap(q) + " - Wikipedia" : "Santolina - Wikipedia";
-  const link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(cap(q||"Santolina").split(" ")[0]);
+  q = (q || "Central Park Zoo opening hours").trim(); // both callers pass one; this is a floor
+  const shape = SHAPES.find(s => s.test(q));
+  const subj = subject(q, shape.cues);
+  const [title, link] = shape.result(subj);
   $("jsonBody").innerHTML =
 `{
-<div class="indent1 fold" data-t="meta">▸ <span class="k">"search_metadata"</span>: { … }, <span class="hint">id, timing, stored urls</span></div><div class="indent2 hidden" data-b="meta"><span class="k">"id"</span>: <span class="s">"search_m3WR9zk90…"</span>, <span class="k">"created_at"</span>: <span class="s">"2026-08-11T…"</span>, <span class="k">"request_time_taken"</span>: <span class="n">0.71</span></div>
-<div class="indent1 fold" data-t="params">▸ <span class="k">"search_parameters"</span>: { … }, <span class="hint">q + applied defaults gl, hl, device</span></div><div class="indent2 hidden" data-b="params"><span class="k">"q"</span>: <span class="s">"${esc(q)||"santolina plant"}"</span>, <span class="k">"device"</span>: <span class="s">"${state.ranDevice||"desktop"}"</span>, <span class="k">"gl"</span>: <span class="s">"us"</span>, <span class="k">"hl"</span>: <span class="s">"en"</span></div>
-<div class="indent1">▾ <span class="k">"organic_results"</span>: [ <span class="hint">10 items</span></div>
+${fold("meta", "search_metadata", "{ … },", "id, timing, stored urls",
+  `${K("id")}: ${S("search_m3WR9zk90…")}, ${K("created_at")}: ${S("2026-08-11T…")}, ${K("request_time_taken")}: ${N("0.71")}`)}
+${fold("params", "search_parameters", "{ … },", "q + applied defaults gl, hl, device",
+  `${K("q")}: ${S(q)}, ${K("device")}: ${S(state.ranDevice || "desktop")}, ${K("gl")}: ${S("us")}, ${K("hl")}: ${S("en")}`)}
+${shape.lead(subj, q)}
+<div class="indent1">▾ ${K("organic_results")}: [ <span class="hint">10 items</span></div>
 <div class="indent2">▾ {</div>
-<div class="indent3"><span class="k">"position"</span>: <span class="n">1</span>,</div>
-<div class="indent3"><span class="k">"title"</span>: <span class="s">"${esc(title)}"</span>,</div>
-<div class="indent3"><span class="k">"link"</span>: <span class="s">"${esc(link)}"</span>,</div>
-<div class="indent3"><span class="k">"snippet"</span>: <span class="s">"${esc(cap(q)||"Santolina")} is a …"</span></div>
+<div class="indent3">${K("position")}: ${N(1)},</div>
+<div class="indent3">${K("title")}: ${S(title)},</div>
+<div class="indent3">${K("link")}: ${S(link)},</div>
+<div class="indent3">${K("snippet")}: ${S(cap(subj) + " …")}</div>
 <div class="indent2">},</div>
 <div class="indent2 hint">▸ { … } × 9 more</div>
 <div class="indent1">],</div>
-<div class="indent1 fold" data-t="rel">▸ <span class="k">"related_searches"</span>: [ … ], <span class="hint">8 items</span></div><div class="indent2 hidden" data-b="rel"><span class="s">"${esc(q)||"santolina"} care"</span>, <span class="s">"${esc(q)||"santolina"} pruning"</span>, …</div>
-<div class="indent1 fold" data-t="kg">▸ <span class="k">"knowledge_graph"</span>: { … }</div><div class="indent2 hidden" data-b="kg"><span class="k">"title"</span>: <span class="s">"${esc(cap(q)||"Santolina")}"</span>, <span class="k">"type"</span>: <span class="s">"Topic"</span></div>
+${fold("rel", "related_searches", "[ … ]", "8 items, each a query and its link",
+  `{ ${K("query")}: ${S("…")}, ${K("link")}: ${S("https://www.google.com/search?q=…")} }`)}
 }`;
   document.querySelectorAll(".fold").forEach(f => f.onclick = () => {
     const b = document.querySelector(`[data-b="${f.dataset.t}"]`);
@@ -985,7 +1076,6 @@ function renderJson(q) {
     f.innerHTML = f.innerHTML.replace(b.classList.contains("hidden") ? "▾" : "▸", b.classList.contains("hidden") ? "▸" : "▾");
   });
 }
-function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
 /* ===== Transitions ===== */
 function openSplit() { content.classList.add("split"); strip.style.display = "none"; state.responseOpen = true; showTab(false); }
@@ -993,7 +1083,7 @@ function openSplit() { content.classList.add("split"); strip.style.display = "no
    landing place once one exists. */
 function collapse() {
   content.classList.remove("split"); state.responseOpen = false;
-  strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? "coffee (example)" : (state.ranQ || ""));
+  strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? state.cachedQ + " (example)" : (state.ranQ || ""));
 }
 /* A live run costs a round trip, so the button spins and the panel holds the
    shape of a response for a beat. The cached example skips all of that, which
@@ -1019,9 +1109,11 @@ function run() {
     $("runBtn").classList.remove("working"); state.busy = false;
   }, 520);
 }
-function peek() {
-  state.hasResponse = true; state.cached = true;
-  renderJson("coffee"); setChips(false); openSplit(); arrive();
+/* A card shows the response for its own query, never a stand in for one. It
+   still leaves the bar alone: that is what makes it an example and not a run. */
+function peek(q) {
+  state.hasResponse = true; state.cached = true; state.cachedQ = q;
+  renderJson(q); setChips(false); openSplit(); arrive();
 }
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 /* Surface the run budget for a beat when it changes, so spending one is felt
@@ -1163,16 +1255,20 @@ document.addEventListener("keydown", e => {
 document.querySelectorAll(".nav-row:not(.active)").forEach(r =>
   r.addEventListener("click", () => toast("Only Google Search is built in this prototype")));
 
-/* Example cards: "View response" shows the cached example, "Load into
-   request" only fills q in the bar — same path as typing it. */
-document.querySelectorAll(".view-response").forEach(a => a.addEventListener("click", peek));
-document.querySelectorAll(".load-btn").forEach(b => b.addEventListener("click", () => {
-  qInput.value = b.dataset.q;
-  state.q = b.dataset.q;
-  syncViews();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  qInput.focus({ preventScroll: true });
-}));
+/* Example cards: "View response" shows that card's cached response, "Load into
+   request" only fills q in the bar — same path as typing it. Both read the one
+   query on the card, so a card can never show a response it did not advertise. */
+document.querySelectorAll(".card").forEach(card => {
+  const q = card.querySelector(".load-btn").dataset.q;
+  card.querySelector(".view-response").addEventListener("click", () => peek(q));
+  card.querySelector(".load-btn").addEventListener("click", () => {
+    qInput.value = q;
+    state.q = q;
+    syncViews();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    qInput.focus({ preventScroll: true });
+  });
+});
 
 /* The band grows when the limit bar appears, so let it report its own height
    rather than keeping a magic number in the stylesheet. */
