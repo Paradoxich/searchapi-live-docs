@@ -144,7 +144,7 @@
   .bar .url::-webkit-scrollbar { display: none; }
   .bar .url .q-input { font-family: var(--mono); font-size: 12px; color: var(--accent); background: transparent; border: none; border-bottom: 1.5px solid var(--underline); outline: none; padding: 0 1px 1px; min-width: 40px; }
   .bar .url .q-input::placeholder { color: var(--accent); opacity: 1; }
-  .bar .url .param { color: var(--accent); }
+  .bar .url .extra-param { color: var(--accent); }
   .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 8px; border: none; background: rgba(255,255,255,.5); cursor: pointer; color: #000; }
   .icon-btn:hover { background: #fff; }
   .run-btn { display: flex; align-items: center; gap: 4px; height: 32px; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px; font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer; }
@@ -183,8 +183,31 @@
   .group-h { display: flex; align-items: center; padding: 0 0 8px; margin: 28px 0 0; font-size: 11px; font-weight: 500; color: var(--text-mid); }
   /* Each group is a card: heading outside it, rows ruled inside */
   .param-group { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; }
-  .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 16px; border-bottom: 1px solid var(--border); }
-  .row:last-child { border-bottom: none; }
+  /* A parameter is its summary row plus the long form underneath it */
+  .param { border-bottom: 1px solid var(--border); }
+  .param:last-child { border-bottom: none; }
+  .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 16px 0 10px; cursor: pointer; transition: background-color .14s ease; }
+  .row:hover { background: rgba(0, 0, 0, .022); }
+  .param:first-child .row:hover { border-radius: 7px 7px 0 0; }
+  .param:last-child .row:hover { border-radius: 0 0 7px 7px; }
+  /* Twisty in the gutter, same language as the sidebar's nested rows */
+  .twist { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; border: none; background: none; color: var(--text-quiet); cursor: pointer; }
+  .twist .ic { width: 14px; height: 14px; transform: rotate(-90deg); transition: transform .24s var(--ease); }
+  .param.open .twist .ic { transform: none; }
+  .param.open .twist { color: var(--text-mid); }
+  .row-detail { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .26s var(--ease), opacity .18s ease; }
+  .param.open .row-detail { grid-template-rows: 1fr; opacity: 1; }
+  .row-detail > .detail-inner { min-height: 0; overflow: hidden; visibility: hidden; transition: visibility 0s linear .26s; }
+  .param.open .row-detail > .detail-inner { visibility: visible; transition: visibility 0s; }
+  .detail-body { padding: 2px 16px 18px 50px; max-width: 780px; font-size: 12.5px; line-height: 1.6; color: var(--text-2); }
+  .detail-body p { margin: 10px 0 0; }
+  .detail-body ul { margin: 8px 0 0; padding-left: 18px; }
+  .detail-body li { margin: 4px 0; }
+  .detail-body b { font-weight: 500; color: var(--ink); }
+  .detail-body code { font-family: var(--mono); font-size: 11.5px; color: var(--ink); background: rgba(0, 0, 0, .04); border-radius: 4px; padding: 1px 4px; }
+  .detail-body a { color: var(--accent-2); text-decoration: none; border-bottom: 1px solid var(--chip-border); }
+  .detail-body a:hover { border-bottom-color: var(--accent-2); }
+  .detail-body a code { color: inherit; }
   .row .name { font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: -0.13px; color: var(--ink); width: 120px; max-width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .name.muted { color: var(--mono-dim); }
   .row .desc { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -432,7 +455,7 @@
   <div class="bar-wrap">
     <div class="bar">
       <span class="verb">GET</span>
-      <span class="url">/api/v1/search?engine=google&amp;q=<input id="q" class="q-input" placeholder="try your own query" size="18" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span id="extraParams" class="param"></span></span>
+      <span class="url">/api/v1/search?engine=google&amp;q=<input id="q" class="q-input" placeholder="try your own query" size="18" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span id="extraParams" class="extra-param"></span></span>
       <button class="icon-btn" id="codeBtn" title="View code" aria-label="View code"><svg class="ic"><use href="#i-code"/></svg></button>
       <button class="icon-btn" id="copyBtn" title="Copy request" aria-label="Copy request"><svg class="ic"><use href="#i-copy"/></svg></button>
       <div class="run-wrap">
@@ -475,23 +498,41 @@
 
       <div class="group-h">Search query</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for q"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">q</span>
           <span class="flag req">required</span>
           <span class="desc">Terms to search. Operators work: "exact", site:, inurl:, intitle:, AND, OR.</span>
           <span class="ctl"><button class="pill set" id="qMirror">try your own query</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">This parameter is used for the terms you want to search on Google. Queries can include operators and advanced filters like <code>"machine learning models"</code>, <code>site:</code>, <code>inurl:</code>, <code>intitle:</code>, <code>AND</code>, or <code>OR</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for kgmid"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">kgmid</span>
           <span class="flag">optional</span>
           <span class="desc">Knowledge Graph id (/m/ location, /g/ entity).</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Defines a Knowledge Graph identifier (kgmid), representing entities in Google's Knowledge Graph. Format:
+<ul>
+<li><b>Location identifier</b> (<code>/m/</code>): typically followed by 2 to 7 characters. Used primarily to represent specific locations. Find the identifier by searching for the Freebase ID on <a href="https://www.wikidata.org/wiki/Property:P646" target="_blank" rel="noopener">Wikidata</a>. Example: <code>kgmid=/m/02_286</code> refers to New York.</li>
+<li><b>Google Knowledge Graph identifier</b> (<code>/g/</code>): typically followed by a longer alphanumeric string. Represents general entities. Find details on <a href="https://www.wikidata.org/wiki/Property:P2671" target="_blank" rel="noopener">Wikidata</a>. Example: <code>kgmid=/g/11f555cn8l</code> refers to TikTok.</li>
+</ul></div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Device</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for device"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">device</span>
           <span class="flag">optional</span>
           <span class="desc">desktop | mobile | tablet.</span>
@@ -503,137 +544,260 @@
             </select>
           </span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">The default parameter <code>desktop</code> defines the search on a desktop device. The <code>mobile</code> parameter defines the search on a mobile device. The <code>tablet</code> parameter defines the search on a tablet device.</div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Geographic location</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for location"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">location</span>
           <span class="flag">optional</span>
           <span class="desc">Canonical location of the search. Sets uule automatically.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Specifies the canonical location of the search. For exact targeting or to see all available options, check the <a href="https://www.searchapi.io/docs/locations-api" target="_blank" rel="noopener">Locations API</a>. If multiple locations match your input, the most popular one is selected.
+<p>For example, <code>location=New York</code> selects <code>New York,United States</code>, and <code>location=London</code> selects <code>London TV Region,England,United Kingdom</code>.</p></div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for uule"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">uule</span>
           <span class="flag">optional</span>
           <span class="desc">Exact encoded location. Cannot be combined with location.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Sets the exact Google encoded location for the search. <code>uule</code> and <code>location</code> cannot be used at the same time. SearchApi builds it for you when you use the <code>location</code> parameter, but you can provide your own if you want precise control.</div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Localization</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for gl"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">gl</span>
           <span class="flag">optional</span>
           <span class="desc">Country of the search.</span>
           <span class="ctl"><button class="pill">us ▾</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">The default parameter <code>us</code> defines the country of the search. Check the full list of supported <a href="https://www.searchapi.io/docs/parameters/google/gl" target="_blank" rel="noopener">Google <code>gl</code> countries</a>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for hl"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">hl</span>
           <span class="flag">optional</span>
           <span class="desc">Interface language of the search.</span>
           <span class="ctl"><button class="pill">en ▾</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">The default parameter <code>en</code> defines the interface language of the search. Check the full list of supported <a href="https://www.searchapi.io/docs/parameters/google/hl" target="_blank" rel="noopener">Google <code>hl</code> languages</a>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for lr"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">lr</span>
           <span class="flag">optional</span>
           <span class="desc">Restrict to document language(s), lang_XX, combinable with |.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Restricts results to documents written in a particular language or set of languages. The accepted format is <code>lang_{2-letter country code}</code>. To filter documents written in Japanese, set <code>lang_jp</code>. To include multiple languages, <code>lang_it|lang_de</code> restricts the search to documents written in either Italian or German. Google identifies the document language from the top level domain of its URL, any language meta tags, or the language used in the body text. Check the full list of supported <a href="https://www.searchapi.io/docs/parameters/google/lr" target="_blank" rel="noopener">Google <code>lr</code> languages</a>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for cr"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">cr</span>
           <span class="flag">optional</span>
           <span class="desc">Restrict to documents originating in a country.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Restricts results to documents originating in a particular country. Google determines the country of a document by the top level domain of its URL or by the geographic location of the web server's IP address. Check the full list of supported <a href="https://www.searchapi.io/docs/parameters/google/cr" target="_blank" rel="noopener">Google <code>cr</code> countries</a>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row dim">
+          <button class="twist" aria-expanded="false" aria-label="Show details for google_domain"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">google_domain</span>
           <span class="flag">deprecated</span>
           <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
           <span class="ctl"><span class="none">—</span></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">As of Apr 15, 2025, Google began phasing out country code top level domains (ccTLDs). Users visiting local domains like <code>google.de</code> or <code>google.co.uk</code> are now automatically redirected to <code>google.com</code>. For localized searches, use <code>gl</code> (country), <code>hl</code> (language) or other localization parameters instead. Learn more in <a href="https://blog.google/products/search/country-code-top-level-domains/" target="_blank" rel="noopener">Google's announcement</a>.</div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Filters</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for nfpr"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">nfpr</span>
           <span class="flag">optional</span>
           <span class="desc">Exclude auto-corrected (spelling) results.</span>
           <span class="ctl"><button class="pill">0 · include</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Controls whether results from queries that have been auto corrected for spelling errors are included. To exclude these auto corrected results, set the value to <code>1</code>. By default the value is <code>0</code>, meaning auto corrected results are included.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for filter"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">filter</span>
           <span class="flag">optional</span>
           <span class="desc">Duplicate Content and Host Crowding filters.</span>
           <span class="ctl"><button class="pill">1 · on</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Controls whether the Duplicate Content and Host Crowding filters are enabled. Set the value to <code>1</code> to enable these filters, which is the default. To disable them, set the value to <code>0</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for safe"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">safe</span>
           <span class="flag">optional</span>
           <span class="desc">SafeSearch: active | blur | off.</span>
           <span class="ctl"><button class="pill">blur ▾</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Toggles SafeSearch for the results, filtering adult content from your results. Google's filters check keywords, phrases and URLs. No filter is 100 percent accurate, but SafeSearch removes the overwhelming majority of adult content. Supported values are <code>active</code> to enable strict SafeSearch, <code>blur</code> to blur explicit images, and <code>off</code> to disable it. By default the value is <code>blur</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for time_period"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">time_period</span>
           <span class="flag">optional</span>
           <span class="desc">last_1_minute … last_year, or custom via min/max.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Restricts results to URLs based on date. Supported values are:
+<ul>
+<li><code>last_1_minute</code>, <code>last_5_minutes</code>, <code>last_15_minutes</code>, <code>last_30_minutes</code></li>
+<li><code>last_hour</code>, <code>last_day</code>, <code>last_week</code>, <code>last_month</code>, <code>last_year</code></li>
+</ul>
+<p>Using <code>time_period_min</code> or <code>time_period_max</code>, you can specify a custom time period. Both can also be used separately.</p></div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for time_period_min"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">time_period_min</span>
           <span class="flag">optional</span>
           <span class="desc">Custom start, MM/DD/YYYY.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Specifies the start of the time period. Can be used together with <code>time_period_max</code>. The value should be in the format <code>MM/DD/YYYY</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for time_period_max"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">time_period_max</span>
           <span class="flag">optional</span>
           <span class="desc">Custom end, MM/DD/YYYY.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Specifies the end of the time period. Can be used together with <code>time_period_min</code>. The value should be in the format <code>MM/DD/YYYY</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for verbatim"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">verbatim</span>
           <span class="flag">optional</span>
           <span class="desc">Exact keywords only. Stricter than nfpr.</span>
           <span class="ctl"><button class="pill quiet">+ set</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Forces Google to use your exact keywords, bypassing automatic spelling corrections, synonyms, and personalized or stemmed variations. Set the value to <code>true</code> to enable. Can be combined with <code>time_period</code> filters.
+<p>Verbatim is stricter than <code>nfpr</code>. It disables all query modifications, not only spelling corrections. If you only want to prevent spelling auto correction while keeping other Google features, use <code>nfpr=1</code> instead.</p></div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Pagination</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for page"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">page</span>
           <span class="flag">optional</span>
           <span class="desc">Which page of results.</span>
           <span class="ctl"><button class="pill">1</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Indicates which page of results to return. By default it is set to <code>1</code>.</div>
+        </div></div>
+        </div>
+        <div class="param">
         <div class="row dim">
+          <button class="twist" aria-expanded="false" aria-label="Show details for num"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name muted">num</span>
           <span class="flag">constant</span>
           <span class="desc">Fixed by Google since Sep 2025. Rank Tracking API for num=100.</span>
           <span class="ctl"><button class="pill muted">10</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Phased out by Google in September 2025. It is now constant at 10. Check the <a href="https://www.searchapi.io/docs/google-rank-tracking-api" target="_blank" rel="noopener">Google Rank Tracking API</a> for <code>num=100</code> support.</div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Optimization</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for optimization_strategy"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name">optimization_strategy</span>
           <span class="flag">optional</span>
           <span class="desc">performance | ads.</span>
           <span class="ctl"><button class="pill">performance ▾</button></span>
         </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Controls how the search request is optimized. Available options:
+<ul>
+<li><code>performance</code>, the default.</li>
+<li><code>ads</code>, optimizes for a higher ad collection success rate, which may result in longer request processing times.</li>
+</ul></div>
+        </div></div>
+        </div>
       </div>
 
       <div class="group-h">Zero data retention</div>
       <div class="param-group">
+        <div class="param">
         <div class="row">
+          <button class="twist" aria-expanded="false" aria-label="Show details for zero_retention"><svg class="ic"><use href="#i-chevron"/></svg></button>
           <span class="name muted">zero_retention</span>
           <span class="flag">Enterprise only</span>
           <span class="desc">No logging or storage of parameters, HTML, or JSON.</span>
           <span class="ctl"><button class="pill quiet">Upgrade</button></span>
+        </div>
+        <div class="row-detail"><div class="detail-inner">
+          <div class="detail-body">Set this parameter to <code>true</code> to disable all logging and persistent storage. No request parameters, HTML, or JSON responses are stored or logged. Suitable for high compliance use cases. Debugging and support may be limited while enabled.</div>
+        </div></div>
         </div>
       </div>
 
@@ -858,6 +1022,18 @@ $("copyBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(url); toast("Copied with a YOUR_API_KEY placeholder");
 });
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
+
+/* Parameters expand to their long form. The whole row is the target, except
+   the control column, which has its own job. */
+document.querySelectorAll(".param").forEach(p => {
+  const row = p.querySelector(".row"), twist = p.querySelector(".twist");
+  const toggle = () => {
+    const open = p.classList.toggle("open");
+    twist.setAttribute("aria-expanded", String(open));
+  };
+  row.addEventListener("click", e => { if (!e.target.closest(".ctl")) toggle(); });
+  twist.addEventListener("click", e => { e.stopPropagation(); toggle(); });
+});
 
 /* Sidebar: cmd/ctrl+K focuses search, typing filters the catalog live.
    Only Google Search has a page; other rows say so. */
