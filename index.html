@@ -960,115 +960,43 @@ function setChips(stale) {
   swapChips();
 }
 
-/* ===== Canned responses, rendered smart-open =====
-   Result types are not a parameter: Google reads the query and the payload
-   changes shape with it. So the query picks the payload here too. The block a
-   query earns arrives open, because it is the answer to "what did asking this
-   get me", and it carries the annotation the reader would want next. Only the
-   subject of the query is ever interpolated. Everything a fold hides is field
-   structure, so no leftover noun can attach itself to a query someone typed. */
+/* ===== Canned response, rendered smart-open =====
+   Which block sits above the organic results is what the examples promise, so
+   the query picks one. Four canned blocks, keyword matched. */
 function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
-const K = k => `<span class="k">"${k}"</span>`,
-      S = v => `<span class="s">"${esc(v)}"</span>`,
-      N = v => `<span class="n">${v}</span>`;
-const wiki = s => "https://en.wikipedia.org/wiki/" + encodeURIComponent(s.split(/\s+/).map(cap).join("_"));
-/* The subject is the query with its cue words taken out: "Lakers last game"
-   asks about the Lakers, and every value built from it should say so. */
-const subject = (q, cues) =>
-  q.replace(cues, " ").replace(/\s+/g, " ").trim().replace(/^(the|a|an) /i, "") || q;
-
-/* A folded key: the summary line, plus the body it hides. */
-function fold(id, key, tail, hint, body) {
-  return `<div class="indent1 fold" data-t="${id}">▸ ${K(key)}: ${tail} <span class="hint">${hint}</span></div>`
-       + `<div class="indent2 hidden" data-b="${id}">${body}</div>`;
+function leadBlock(q) {
+  if (/\b(game|score|fixtures|standings)\b/i.test(q)) return `<div class="indent1">▾ <span class="k">"sports_results"</span>: { <span class="hint">the fixture above the results</span></div>
+<div class="indent2"><span class="k">"type"</span>: <span class="s">"team_sport"</span>, <span class="k">"game_spotlight"</span>: { <span class="k">"status"</span>: <span class="s">"Final"</span>, <span class="k">"teams"</span>: [ … ] }</div>
+<div class="indent1">},</div>`;
+  if (/\b(price|stock|quote|futures)\b/i.test(q)) return `<div class="indent1">▾ <span class="k">"answer_box"</span>: { <span class="hint">the quote above the results</span></div>
+<div class="indent2"><span class="k">"type"</span>: <span class="s">"finance_results"</span>, <span class="k">"price"</span>: <span class="n">2046.9</span>, <span class="k">"currency"</span>: <span class="s">"USD"</span></div>
+<div class="indent1">},</div>`;
+  if (/\b(hours|open|what|who|when|where|how)\b/i.test(q)) return `<div class="indent1">▾ <span class="k">"answer_box"</span>: { <span class="hint">Google answered inline</span></div>
+<div class="indent2"><span class="k">"type"</span>: <span class="s">"open_hours"</span>, <span class="k">"time"</span>: <span class="s">"10 AM–4:30 PM"</span>, <span class="k">"open_hours"</span>: [ … ]</div>
+<div class="indent1">},</div>`;
+  return `<div class="indent1">▾ <span class="k">"knowledge_graph"</span>: { <span class="hint">the entity panel</span></div>
+<div class="indent2"><span class="k">"title"</span>: <span class="s">"${esc(cap(q))}"</span>, <span class="k">"type"</span>: <span class="s">"Topic"</span></div>
+<div class="indent1">},</div>`;
 }
-/* An open object: one field per line, annotated on the way in. */
-function openBlock(key, hint, lines) {
-  return `<div class="indent1">▾ ${K(key)}: { <span class="hint">${hint}</span></div>`
-       + lines.map(l => `<div class="indent2">${l}</div>`).join("")
-       + `<div class="indent1">},</div>`;
-}
-
-/* First match wins, so the cues run from most specific to least. */
-const SHAPES = [
-  {
-    id: "sports",
-    test: q => /\b(games?|scores?|standings|fixtures?|schedules?|matches)\b/i.test(q),
-    cues: /\b(last|next|latest|recent|final|tonight|games?|scores?|standings|fixtures?|schedules?|matches|results?)\b/gi,
-    result: s => [`${s} Scores, Stats and Highlights`, `https://www.espn.com/search/_/q/${encodeURIComponent(s)}`],
-    lead: (s, q) => openBlock("sports_results", "the fixture Google put above the results", [
-      `${K("type")}: ${S("team_sport")},`,
-      `${K("title")}: ${S(s)},`,
-      `${K("game_spotlight")}: { ${K("status")}: ${S(/\b(last|latest|final|scores?|results?)\b/i.test(q) ? "Final" : "Scheduled")}, ${K("teams")}: [ … ] }`
-    ])
-  },
-  {
-    id: "finance",
-    test: q => /\b(price|stocks?|quote|shares|ticker|futures|market cap|chart)\b/i.test(q)
-            || /^[A-Z.]{2,6}$/.test(q.trim()),
-    cues: /\b(price|stocks?|quote|shares|ticker|futures|chart|market cap|today|now)\b/gi,
-    result: s => [`${s.toUpperCase()} Quote`, `https://finance.yahoo.com/lookup?s=${encodeURIComponent(s)}`],
-    lead: s => openBlock("answer_box", "the quote Google put above the results", [
-      `${K("type")}: ${S("finance_results")},`,
-      `${K("stock")}: ${S(s.toUpperCase())},`,
-      `${K("price")}: ${N("2046.9")}, ${K("currency")}: ${S("USD")},`,
-      `${K("price_change")}: { ${K("percentage")}: ${N("0.23")}, ${K("is_up")}: ${N("true")} }`
-    ])
-  },
-  {
-    id: "answer",
-    test: q => /\b(hours|open|opening|closing|what|what's|who|when|where|why|how)\b/i.test(q),
-    cues: /\b(what is|what's|whats|who is|when is|where is|how much|how many|how to|why is|opening|closing|open|hours|times?)\b/gi,
-    result: s => [`${cap(s)} - Wikipedia`, wiki(s)],
-    /* Hours get their own answer box type; anything else Google answers with a
-       featured snippet, which is the same key wearing a different shape. */
-    lead: (s, q) => openBlock("answer_box", "Google answered inline, above the results",
-      /\b(hours|open|closing)\b/i.test(q)
-        ? [ `${K("type")}: ${S("open_hours")},`,
-            `${K("title")}: ${S(cap(s))},`,
-            `${K("time")}: ${S("10 AM–4:30 PM")},`,
-            `${K("open_hours")}: [ … ]` ]
-        : [ `${K("type")}: ${S("organic_result")},`,
-            `${K("answer")}: ${S("…")},`,
-            `${K("organic_result")}: { ${K("title")}: … , ${K("link")}: … }` ])
-  },
-  {
-    id: "knowledge",
-    test: () => true,
-    cues: /\b(wiki|wikipedia|info|about)\b/gi,
-    result: s => [`${cap(s)} - Wikipedia`, wiki(s)],
-    lead: s => openBlock("knowledge_graph", "the entity panel Google matched", [
-      `${K("kgmid")}: ${S("/m/0f4l2s")},`,
-      `${K("title")}: ${S(cap(s))},`,
-      `${K("type")}: ${S("Topic")},`,
-      `${K("description")}: ${S(cap(s) + " …")}`
-    ])
-  }
-];
 
 function renderJson(q) {
-  q = (q || "Central Park Zoo opening hours").trim(); // both callers pass one; this is a floor
-  const shape = SHAPES.find(s => s.test(q));
-  const subj = subject(q, shape.cues);
-  const [title, link] = shape.result(subj);
+  const title = q ? cap(q) + " - Wikipedia" : "Santolina - Wikipedia";
+  const link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(cap(q||"Santolina").split(" ")[0]);
   $("jsonBody").innerHTML =
 `{
-${fold("meta", "search_metadata", "{ … },", "id, timing, stored urls",
-  `${K("id")}: ${S("search_m3WR9zk90…")}, ${K("created_at")}: ${S("2026-08-11T…")}, ${K("request_time_taken")}: ${N("0.71")}`)}
-${fold("params", "search_parameters", "{ … },", "q + applied defaults gl, hl, device",
-  `${K("q")}: ${S(q)}, ${K("device")}: ${S(state.ranDevice || "desktop")}, ${K("gl")}: ${S("us")}, ${K("hl")}: ${S("en")}`)}
-${shape.lead(subj, q)}
-<div class="indent1">▾ ${K("organic_results")}: [ <span class="hint">10 items</span></div>
+<div class="indent1 fold" data-t="meta">▸ <span class="k">"search_metadata"</span>: { … }, <span class="hint">id, timing, stored urls</span></div><div class="indent2 hidden" data-b="meta"><span class="k">"id"</span>: <span class="s">"search_m3WR9zk90…"</span>, <span class="k">"created_at"</span>: <span class="s">"2026-08-11T…"</span>, <span class="k">"request_time_taken"</span>: <span class="n">0.71</span></div>
+<div class="indent1 fold" data-t="params">▸ <span class="k">"search_parameters"</span>: { … }, <span class="hint">q + applied defaults gl, hl, device</span></div><div class="indent2 hidden" data-b="params"><span class="k">"q"</span>: <span class="s">"${esc(q)||"santolina plant"}"</span>, <span class="k">"device"</span>: <span class="s">"${state.ranDevice||"desktop"}"</span>, <span class="k">"gl"</span>: <span class="s">"us"</span>, <span class="k">"hl"</span>: <span class="s">"en"</span></div>
+${leadBlock(q)}
+<div class="indent1">▾ <span class="k">"organic_results"</span>: [ <span class="hint">10 items</span></div>
 <div class="indent2">▾ {</div>
-<div class="indent3">${K("position")}: ${N(1)},</div>
-<div class="indent3">${K("title")}: ${S(title)},</div>
-<div class="indent3">${K("link")}: ${S(link)},</div>
-<div class="indent3">${K("snippet")}: ${S(cap(subj) + " …")}</div>
+<div class="indent3"><span class="k">"position"</span>: <span class="n">1</span>,</div>
+<div class="indent3"><span class="k">"title"</span>: <span class="s">"${esc(title)}"</span>,</div>
+<div class="indent3"><span class="k">"link"</span>: <span class="s">"${esc(link)}"</span>,</div>
+<div class="indent3"><span class="k">"snippet"</span>: <span class="s">"${esc(cap(q))||"Santolina"} …"</span></div>
 <div class="indent2">},</div>
 <div class="indent2 hint">▸ { … } × 9 more</div>
 <div class="indent1">],</div>
-${fold("rel", "related_searches", "[ … ]", "8 items, each a query and its link",
-  `{ ${K("query")}: ${S("…")}, ${K("link")}: ${S("https://www.google.com/search?q=…")} }`)}
+<div class="indent1 fold" data-t="rel">▸ <span class="k">"related_searches"</span>: [ … ], <span class="hint">8 items</span></div><div class="indent2 hidden" data-b="rel">{ <span class="k">"query"</span>: <span class="s">"…"</span>, <span class="k">"link"</span>: <span class="s">"https://www.google.com/search?q=…"</span> }</div>
 }`;
   document.querySelectorAll(".fold").forEach(f => f.onclick = () => {
     const b = document.querySelector(`[data-b="${f.dataset.t}"]`);
