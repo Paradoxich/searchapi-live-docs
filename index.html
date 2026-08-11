@@ -69,9 +69,16 @@
   .nav-search input::placeholder { color: var(--text-ghost); }
   .nav-search input::-webkit-search-cancel-button { display: none; }
   .nav-search kbd { font-family: var(--sans); font-size: 10.5px; color: var(--text-quiet); border: 1px solid var(--border-strong); border-radius: 4px; padding: 1px 4px; }
-  .nav-list { display: flex; flex-direction: column; gap: 28px; }
+  .nav-list { display: flex; flex-direction: column; gap: 12px; }
   .nav-group { display: flex; flex-direction: column; gap: 2px; }
-  .nav-h { font-size: 11px; font-weight: 500; color: var(--text-ghost); padding: 0 8px 6px; }
+  .nav-group.collapsed { gap: 0; }
+  /* Groups are disclosures: only the group you are in stays open */
+  .nav-h { display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px; margin: 0; background: none; border: none; border-radius: 8px; font-family: var(--sans); font-size: 11px; font-weight: 500; color: var(--text-ghost); text-align: left; cursor: pointer; }
+  .nav-h:hover { color: var(--text-btn); }
+  .nav-h .chev-sm { width: 14px; height: 14px; display: block; flex-shrink: 0; margin-left: auto; color: var(--text-quiet); transition: transform .15s ease; transform: rotate(180deg); }
+  .nav-group.collapsed .nav-h .chev-sm { transform: none; }
+  .nav-group.collapsed > .nav-row, .nav-group.collapsed > .nav-sub { display: none; }
+  .nav-row.miss, .nav-group.miss { display: none; }
   .nav-row { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 8px; border-radius: 8px; font-size: 13px; letter-spacing: -0.13px; color: #454543; cursor: pointer; }
   .nav-row:hover { background: var(--surface-2); }
   .nav-row.active { background: var(--btn); font-weight: 500; cursor: default; }
@@ -238,7 +245,7 @@
     <nav class="nav">
       <div class="nav-list" id="navList">
         <div class="nav-group">
-          <div class="nav-h">Web search</div>
+          <button class="nav-h"><span>Web search</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row active" id="googleRow" aria-current="page" aria-expanded="true">Google Search <svg class="ic chev"><use href="#i-chevron"/></svg></span>
           <div class="nav-sub" id="googleSub">
             <span class="nav-row sub">Google Light</span>
@@ -257,14 +264,14 @@
           <span class="nav-row">Naver</span>
           <span class="nav-row">Yahoo Search</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">AI assistants</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>AI assistants</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">ChatGPT</span>
           <span class="nav-row">Gemini <span class="badge">New</span></span>
           <span class="nav-row">Perplexity <span class="badge">New</span></span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Images &amp; video</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Images &amp; video</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Images</span>
           <span class="nav-row">Google Lens</span>
           <span class="nav-row">Google Videos</span>
@@ -272,8 +279,8 @@
           <span class="nav-row">YouTube</span>
           <span class="nav-row">Yandex Reverse Image</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">News &amp; research</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>News &amp; research</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google News</span>
           <span class="nav-row">Google Trends</span>
           <span class="nav-row">Google Finance</span>
@@ -282,8 +289,8 @@
           <span class="nav-row">Google Books</span>
           <span class="nav-row">Google Forums</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Shopping</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Shopping</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Shopping</span>
           <span class="nav-row">Amazon Search</span>
           <span class="nav-row">eBay Search</span>
@@ -291,34 +298,34 @@
           <span class="nav-row">BestBuy Search</span>
           <span class="nav-row">Shein Search</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Maps &amp; places</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Maps &amp; places</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Maps</span>
           <span class="nav-row">Google Local</span>
           <span class="nav-row">Google Place</span>
           <span class="nav-row">Apple Maps</span>
           <span class="nav-row">Zillow</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Travel</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Travel</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Flights</span>
           <span class="nav-row">Google Hotels</span>
           <span class="nav-row">Google Travel Explore</span>
           <span class="nav-row">Tripadvisor</span>
           <span class="nav-row">Airbnb</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Jobs &amp; events</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Jobs &amp; events</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Jobs</span>
           <span class="nav-row">Google Events</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">App stores</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>App stores</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Play Store</span>
           <span class="nav-row">Apple App Store</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Ads &amp; social</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Ads &amp; social</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Google Ads Transparency</span>
           <span class="nav-row">Meta Ad Library</span>
           <span class="nav-row">LinkedIn Ad Library</span>
@@ -328,8 +335,8 @@
           <span class="nav-row">Instagram Profile</span>
           <span class="nav-row">TikTok Profile</span>
         </div>
-        <div class="nav-group">
-          <div class="nav-h">Support</div>
+        <div class="nav-group collapsed">
+          <button class="nav-h"><span>Support</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <span class="nav-row">Support APIs</span>
         </div>
       </div>
@@ -754,21 +761,44 @@ googleRow.addEventListener("click", () => {
   googleRow.classList.toggle("closed", closed);
   googleRow.setAttribute("aria-expanded", String(!closed));
 });
+const groups = [...document.querySelectorAll(".nav-group")];
+function setCollapsed(g, on) {
+  g.classList.toggle("collapsed", on);
+  g.querySelector(".nav-h").setAttribute("aria-expanded", String(!on));
+}
+groups.forEach(g => {
+  setCollapsed(g, g.classList.contains("collapsed"));
+  g.querySelector(".nav-h").addEventListener("click", () =>
+    setCollapsed(g, !g.classList.contains("collapsed")));
+});
+
+/* Search and collapse would fight each other, so searching drives the
+   disclosures: groups holding a match open, the rest disappear. Clearing
+   the field puts the sidebar back the way the reader left it. */
+let searching = false;
 function filterNav() {
   const t = navSearch.value.trim().toLowerCase();
-  if (t) { // searching reveals nested rows even when collapsed
+  if (t && !searching) {
+    groups.forEach(g => { g.dataset.wasCollapsed = g.classList.contains("collapsed"); });
+    searching = true;
+  } else if (!t && searching) {
+    groups.forEach(g => setCollapsed(g, g.dataset.wasCollapsed === "true"));
+    searching = false;
+  }
+  if (t) { // a match inside Google's sub-APIs should surface too
     googleSub.classList.remove("closed");
     googleRow.classList.remove("closed");
     googleRow.setAttribute("aria-expanded", "true");
   }
-  document.querySelectorAll(".nav-group").forEach(g => {
+  groups.forEach(g => {
     let any = false;
     g.querySelectorAll(".nav-row").forEach(r => {
       const hit = !t || r.textContent.toLowerCase().includes(t);
-      r.style.display = hit ? "" : "none";
+      r.classList.toggle("miss", !hit);
       if (hit) any = true;
     });
-    g.style.display = any ? "" : "none";
+    g.classList.toggle("miss", !any);
+    if (t && any) setCollapsed(g, false);
   });
 }
 navSearch.addEventListener("input", filterNav);
