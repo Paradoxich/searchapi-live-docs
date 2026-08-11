@@ -91,7 +91,9 @@
   /* Hidden rows leave the tab order, but only once they have finished folding */
   .nav-group.collapsed .group-inner, .nav-sub.closed > .sub-inner { visibility: hidden; transition: visibility 0s linear .24s; }
   .nav-row.miss, .nav-group.miss { display: none; }
-  .nav-row { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 8px; border-radius: 8px; font-size: 13px; letter-spacing: -0.13px; color: #454543; cursor: pointer; transition: background-color .14s ease, color .14s ease; }
+  /* Rows indent their label, not their pill, so hover and selection keep the
+     left edge they share with the search field */
+  .nav-row { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 8px 0 20px; border-radius: 8px; font-size: 13px; letter-spacing: -0.13px; color: #454543; cursor: pointer; transition: background-color .14s ease, color .14s ease; }
   .nav-row:hover { background: var(--surface-2); color: var(--ink); }
   .nav-row:active { background: var(--btn); }
   .nav-row.active { background: var(--btn); font-weight: 500; cursor: pointer; }
@@ -103,7 +105,7 @@
   .nav-sub.closed { grid-template-rows: 0fr; opacity: 0; }
   /* Filter results settle in rather than snapping */
   .nav-list.filtering .nav-row { animation: rowIn .18s ease both; }
-  .nav-row.sub { padding-left: 30px; }
+  .nav-row.sub { padding-left: 34px; }
 
   .title-bar { display: flex; align-items: center; gap: 20px; padding: 24px; border-bottom: 1px solid var(--border); }
   .title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
