@@ -117,6 +117,8 @@
   /* Layout: single column at rest, split when response open */
   .content { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 18px; align-items: start; }
   .content.split { grid-template-columns: minmax(0, 430px) minmax(0, 1fr); }
+  .content.split.full { grid-template-columns: 1fr; }
+  .content.split.full .ref { display: none; }
 
   /* Reference column */
   .ref h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.1; color: var(--ink-strong); margin: 20px 0 12px; }
@@ -572,7 +574,7 @@
         <div class="ph-right">
           <button class="ph-btn" title="Download JSON" aria-label="Download JSON"><svg class="ic"><use href="#i-download"/></svg></button>
           <button class="ph-btn" id="copyJson" title="Copy JSON" aria-label="Copy JSON"><svg class="ic"><use href="#i-copy"/></svg></button>
-          <button class="ph-btn ghost" id="collapseBtn" title="Collapse" aria-label="Collapse response"><svg class="ic"><use href="#i-expand"/></svg></button>
+          <button class="ph-btn ghost" id="expandBtn" title="Full width" aria-label="Expand response to full width" aria-pressed="false"><svg class="ic"><use href="#i-expand"/></svg></button>
         </div>
       </div>
       <div class="json" id="jsonBody"></div>
@@ -669,6 +671,8 @@ function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
 /* ===== Transitions ===== */
 function openSplit() { content.classList.add("split"); strip.style.display = "none"; state.responseOpen = true; }
+/* No collapse control in the design yet; the strip below the bar is its
+   landing place once one exists. */
 function collapse() {
   content.classList.remove("split"); state.responseOpen = false;
   strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? "coffee (example)" : (state.ranQ || ""));
@@ -692,7 +696,12 @@ qInput.addEventListener("input", e => { state.q = e.target.value; syncViews(); }
 $("deviceSel").addEventListener("change", e => { state.device = e.target.value; syncViews(); });
 $("qMirror").addEventListener("click", () => qInput.focus());
 $("runBtn").addEventListener("click", run);
-$("collapseBtn").addEventListener("click", collapse);
+$("expandBtn").addEventListener("click", () => {
+  const full = content.classList.toggle("full");
+  const b = $("expandBtn");
+  b.setAttribute("aria-pressed", String(full));
+  b.title = full ? "Exit full width" : "Full width";
+});
 strip.addEventListener("click", openSplit);
 $("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open"));
 document.addEventListener("click", e => { if (!e.target.closest(".bar-wrap")) $("codePop").classList.remove("open"); });
