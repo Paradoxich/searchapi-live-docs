@@ -57,12 +57,21 @@
   .account { display: flex; align-items: center; gap: 12px; padding: 8px; }
   .account .mark { width: 29px; height: 25px; margin-left: 1px; color: #432dd7; }
   .brand { font-size: 14px; font-weight: 600; letter-spacing: -0.14px; color: var(--ink-strong); }
-  .nav { display: flex; flex-direction: column; gap: 32px; padding: 8px; }
-  .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text-ghost); font-size: 14px; letter-spacing: -0.14px; cursor: default; }
+  .nav { display: flex; flex-direction: column; gap: 16px; padding: 8px; flex: 1; overflow-y: auto; scrollbar-width: thin; }
+  .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; flex-shrink: 0; cursor: text; }
+  .nav-search:focus-within { border-color: var(--chip-border); }
   .nav-search .ic { color: #4d4d4a; }
-  .nav-list { display: flex; flex-direction: column; gap: 4px; }
-  .nav-row { display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 12px; font-size: 14px; letter-spacing: -0.14px; color: var(--ink-strong); cursor: default; }
+  .nav-search input { flex: 1; min-width: 0; background: none; border: none; outline: none; font-family: var(--sans); font-size: 14px; letter-spacing: -0.14px; color: var(--ink); }
+  .nav-search input::placeholder { color: var(--text-ghost); }
+  .nav-search input::-webkit-search-cancel-button { display: none; }
+  .nav-search kbd { font-family: var(--sans); font-size: 10.5px; color: var(--text-quiet); border: 1px solid var(--border-strong); border-radius: 4px; padding: 1px 4px; }
+  .nav-list { display: flex; flex-direction: column; gap: 16px; }
+  .nav-group { display: flex; flex-direction: column; gap: 2px; }
+  .nav-h { font-size: 11px; font-weight: 500; color: var(--text-ghost); padding: 0 8px 2px; }
+  .nav-row { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border-radius: 8px; font-size: 14px; letter-spacing: -0.14px; color: var(--ink-strong); cursor: pointer; }
   .nav-row:hover { background: var(--surface-2); }
+  .nav-row.active { background: var(--surface-2); font-weight: 500; cursor: default; }
+  .badge { margin-left: auto; font-size: 10px; font-weight: 500; color: var(--green); background: rgba(74, 178, 104, 0.15); border-radius: 9px; padding: 2px 6px; }
 
   .title-bar { display: flex; align-items: center; gap: 20px; padding: 24px; border-bottom: 1px solid var(--border); }
   .title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -205,14 +214,96 @@
       <span class="brand">Docs</span>
     </div>
     <nav class="nav">
-      <div class="nav-search"><svg class="ic"><use href="#i-search"/></svg>Search APIs</div>
-      <div class="nav-list">
-        <span class="nav-row">Search engines</span>
-        <span class="nav-row">LLMs</span>
-        <span class="nav-row">Realestate</span>
-        <span class="nav-row">Social networks</span>
-        <span class="nav-row">Ecommerce</span>
-        <span class="nav-row">Support API</span>
+      <label class="nav-search"><svg class="ic"><use href="#i-search"/></svg><input id="navSearch" type="search" placeholder="Search APIs" aria-label="Search APIs"><kbd>⌘K</kbd></label>
+      <div class="nav-list" id="navList">
+        <div class="nav-group">
+          <div class="nav-h">Web search</div>
+          <span class="nav-row active" aria-current="page">Google Search</span>
+          <span class="nav-row">Google AI Mode</span>
+          <span class="nav-row">Google Autocomplete</span>
+          <span class="nav-row">Google Rank Tracking <span class="badge">New</span></span>
+          <span class="nav-row">Bing</span>
+          <span class="nav-row">Yandex</span>
+          <span class="nav-row">DuckDuckGo</span>
+          <span class="nav-row">Baidu</span>
+          <span class="nav-row">Naver</span>
+          <span class="nav-row">Yahoo Search</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">AI assistants</div>
+          <span class="nav-row">ChatGPT</span>
+          <span class="nav-row">Gemini <span class="badge">New</span></span>
+          <span class="nav-row">Perplexity <span class="badge">New</span></span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Images &amp; video</div>
+          <span class="nav-row">Google Images</span>
+          <span class="nav-row">Google Lens</span>
+          <span class="nav-row">Google Videos</span>
+          <span class="nav-row">Google Shorts</span>
+          <span class="nav-row">YouTube</span>
+          <span class="nav-row">Yandex Reverse Image</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">News &amp; research</div>
+          <span class="nav-row">Google News</span>
+          <span class="nav-row">Google Trends</span>
+          <span class="nav-row">Google Finance</span>
+          <span class="nav-row">Google Scholar</span>
+          <span class="nav-row">Google Patents</span>
+          <span class="nav-row">Google Books</span>
+          <span class="nav-row">Google Forums</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Shopping</div>
+          <span class="nav-row">Google Shopping</span>
+          <span class="nav-row">Amazon Search</span>
+          <span class="nav-row">eBay Search</span>
+          <span class="nav-row">Walmart Search</span>
+          <span class="nav-row">BestBuy Search</span>
+          <span class="nav-row">Shein Search</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Maps &amp; places</div>
+          <span class="nav-row">Google Maps</span>
+          <span class="nav-row">Google Local</span>
+          <span class="nav-row">Google Place</span>
+          <span class="nav-row">Apple Maps</span>
+          <span class="nav-row">Zillow</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Travel</div>
+          <span class="nav-row">Google Flights</span>
+          <span class="nav-row">Google Hotels</span>
+          <span class="nav-row">Google Travel Explore</span>
+          <span class="nav-row">Tripadvisor</span>
+          <span class="nav-row">Airbnb</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Jobs &amp; events</div>
+          <span class="nav-row">Google Jobs</span>
+          <span class="nav-row">Google Events</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">App stores</div>
+          <span class="nav-row">Google Play Store</span>
+          <span class="nav-row">Apple App Store</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Ads &amp; social</div>
+          <span class="nav-row">Google Ads Transparency</span>
+          <span class="nav-row">Meta Ad Library</span>
+          <span class="nav-row">LinkedIn Ad Library</span>
+          <span class="nav-row">TikTok Ads Library</span>
+          <span class="nav-row">Reddit Ad Library</span>
+          <span class="nav-row">Facebook Business Page</span>
+          <span class="nav-row">Instagram Profile</span>
+          <span class="nav-row">TikTok Profile</span>
+        </div>
+        <div class="nav-group">
+          <div class="nav-h">Support</div>
+          <span class="nav-row">Support APIs</span>
+        </div>
       </div>
     </nav>
   </aside>
