@@ -57,11 +57,12 @@
   .account { display: flex; align-items: center; gap: 12px; padding: 8px; }
   .account .mark { width: 29px; height: 25px; margin-left: 1px; color: #432dd7; }
   .brand { font-size: 14px; font-weight: 600; letter-spacing: -0.14px; color: var(--ink-strong); }
-  .nav { display: flex; flex-direction: column; gap: 28px; padding: 8px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #dededa transparent; }
-  .nav::-webkit-scrollbar { width: 6px; }
-  .nav::-webkit-scrollbar-thumb { background: #dededa; border-radius: 3px; }
+  .nav { display: flex; flex-direction: column; padding: 0 8px 8px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #dededa transparent; }
+  .nav::-webkit-scrollbar { width: 4px; }
+  .nav::-webkit-scrollbar-thumb { background: #dededa; border-radius: 2px; }
   .nav::-webkit-scrollbar-track { background: transparent; }
-  .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; flex-shrink: 0; cursor: text; }
+  /* Pinned above the scroll area so a 60-item catalog never scrolls its own search away */
+  .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 8px 28px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; flex-shrink: 0; cursor: text; }
   .nav-search:focus-within { border-color: var(--chip-border); }
   .nav-search .ic { color: #4d4d4a; }
   .nav-search input { flex: 1; min-width: 0; background: none; border: none; outline: none; font-family: var(--sans); font-size: 13px; letter-spacing: -0.13px; color: var(--ink); }
@@ -225,8 +226,8 @@
       <svg class="mark" viewBox="0 0 28.6775 25.251"><use href="#i-mark"/></svg>
       <span class="brand">Docs</span>
     </div>
+    <label class="nav-search"><svg class="ic"><use href="#i-search"/></svg><input id="navSearch" type="search" placeholder="Search APIs" aria-label="Search APIs"><kbd>⌘K</kbd></label>
     <nav class="nav">
-      <label class="nav-search"><svg class="ic"><use href="#i-search"/></svg><input id="navSearch" type="search" placeholder="Search APIs" aria-label="Search APIs"><kbd>⌘K</kbd></label>
       <div class="nav-list" id="navList">
         <div class="nav-group">
           <div class="nav-h">Web search</div>
