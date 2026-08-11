@@ -99,19 +99,19 @@
 
   /* Response slot (under bar): rest offer / collapsed strip */
   .slot { margin-top: 10px; }
-  .slot .offer { font-size: 12px; color: var(--light); padding: 6px 14px; }
-  .slot .offer a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .slot .offer { font-size: 12px; color: var(--text-quiet); padding: 6px 14px; }
+  .slot .offer a { color: var(--accent-2); cursor: pointer; text-decoration: none; }
   .strip { display: none; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
   .strip .label { font-size: 12px; font-weight: 500; }
-  .strip .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; }
-  .strip .q { font-family: var(--mono); font-size: 11px; color: var(--gray); }
-  .strip .expand { margin-left: auto; font-size: 11.5px; color: var(--gray); }
-  .chip.ok { background: var(--green-bg); color: var(--green-fg); }
-  .chip.stale { background: var(--amber-bg); color: var(--amber-fg); }
+  .strip .q { font-family: var(--mono); font-size: 11px; color: var(--text-2); }
+  .strip .expand { margin-left: auto; font-size: 11.5px; color: var(--text-2); }
+  .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; background: var(--bg); }
+  .chip.ok, .chip.live { color: var(--green); }
+  .chip.stale { color: var(--amber); }
 
   /* Layout: single column at rest, split when response open */
   .content { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 18px; align-items: start; }
-  .content.split { grid-template-columns: 5fr 7fr; }
+  .content.split { grid-template-columns: minmax(0, 430px) minmax(0, 1fr); }
 
   /* Reference column */
   .ref h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.1; color: var(--ink-strong); margin: 20px 0 12px; }
@@ -135,23 +135,24 @@
   select.pill { appearance: none; }
 
   /* Response panel (right column when split) */
-  .panel { display: none; background: #17181d; border-radius: 10px; overflow: hidden; position: sticky; top: 68px; }
+  .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: 68px; }
   .content.split .panel { display: block; }
-  .panel-h { display: flex; align-items: center; gap: 10px; background: #1e2026; padding: 10px 14px; }
-  .panel-h .t { color: #eceef2; font-size: 12.5px; font-weight: 500; }
-  .panel-h .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; }
-  .panel-h .chip.live { background: #143622; color: #7fe0a0; }
-  .panel-h .chip.stale { background: #3a3010; color: #e0c060; }
+  .panel-h { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid var(--border); }
+  .ph-left { display: flex; align-items: center; gap: 8px; }
+  .seg { display: flex; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 8px; }
+  .seg-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 6px; background: none; color: #000; cursor: default; }
+  .seg-btn.active { background: #454542; border: 1px solid #333331; color: #fff; }
+  .seg-btn.disabled { opacity: .6; }
+  .panel-h .t { color: var(--ink-strong); font-size: 12px; font-weight: 500; }
   .panel-h .spacer { flex: 1; }
-  .panel-h button { background: none; border: none; color: #8b8f99; font-size: 11.5px; cursor: pointer; }
-  .tabs { display: flex; gap: 2px; background: #1e2026; padding: 0 14px 8px; }
-  .tab { font-size: 11.5px; color: #8b8f99; background: none; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
-  .tab.active { background: #2a2c34; color: #eceef2; }
-  .tab.disabled { opacity: .4; cursor: default; }
-  .json { font-family: var(--mono); font-size: 12px; line-height: 1.75; color: #9aa0ab; padding: 14px 16px 18px; overflow-x: auto; }
-  .json .k { color: #8db8ff; } .json .s { color: #99d9a6; } .json .n { color: #f2bf80; }
+  .ph-right { display: flex; align-items: center; gap: 8px; }
+  .ph-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 7px; background: var(--btn); color: #000; cursor: pointer; }
+  .ph-btn.ghost { background: none; }
+  .ph-btn:hover { background: #e4e4dc; }
+  .json { font-family: var(--mono); font-size: 11.5px; line-height: 1.75; color: var(--code-punct); padding: 14px 16px 16px; overflow-x: auto; }
+  .json .k { color: var(--code-key); } .json .s { color: var(--code-str); } .json .n { color: var(--code-num); }
   .json .fold { cursor: pointer; user-select: none; }
-  .json .hint { color: #5c616b; }
+  .json .hint { color: var(--code-hint); }
   .json .indent1 { padding-left: 16px; } .json .indent2 { padding-left: 32px; } .json .indent3 { padding-left: 48px; }
   .hidden { display: none; }
 
@@ -166,7 +167,7 @@
   .code-pop .lv { color: var(--accent); border-bottom: 1px solid var(--underline); }
   .bar-wrap { position: relative; }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 40; }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -410,16 +411,21 @@
     <!-- Response panel: right column when split -->
     <div class="panel" id="panel">
       <div class="panel-h">
-        <span class="t">Response</span>
+        <div class="ph-left">
+          <div class="seg">
+            <button class="seg-btn active" title="JSON" aria-label="JSON view"><svg class="ic"><use href="#i-code"/></svg></button>
+            <button class="seg-btn disabled" title="Rendered page preview — out of prototype scope" aria-label="Results view"><svg class="ic"><use href="#i-eye"/></svg></button>
+          </div>
+          <span class="t">Response</span>
+        </div>
+        <span class="spacer"></span>
         <span class="chip live" id="panelChip">200 OK · 0.8s</span>
         <span class="spacer"></span>
-        <button id="copyJson">Copy</button>
-        <button>Download</button>
-        <button id="collapseBtn">— collapse</button>
-      </div>
-      <div class="tabs">
-        <button class="tab active">JSON</button>
-        <button class="tab disabled" title="Rendered page preview — out of prototype scope">Results</button>
+        <div class="ph-right">
+          <button class="ph-btn" title="Download JSON" aria-label="Download JSON"><svg class="ic"><use href="#i-download"/></svg></button>
+          <button class="ph-btn" id="copyJson" title="Copy JSON" aria-label="Copy JSON"><svg class="ic"><use href="#i-copy"/></svg></button>
+          <button class="ph-btn ghost" id="collapseBtn" title="Collapse" aria-label="Collapse response"><svg class="ic"><use href="#i-expand"/></svg></button>
+        </div>
       </div>
       <div class="json" id="jsonBody"></div>
     </div>
