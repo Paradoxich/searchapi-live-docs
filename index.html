@@ -4,35 +4,83 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Google Search API — live docs prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
 <style>
-  /* ===== Skeleton styles: structural only, replace freely with the design system ===== */
   :root {
-    --bg: #f4f4ef;
+    /* surfaces */
+    --bg: #f7f7f0;
     --surface: #ffffff;
-    --ink: #16191f;
-    --gray: #6b7280;
-    --light: #9ca3af;
-    --border: #e2e4e9;
-    --accent: #5b5ad6;
-    --accent-soft: #eeeefc;
-    --accent-border: #c3c3ef;
-    --tint: #e8e6f7;
-    --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+    --surface-2: #f0f0e9;
+    --btn: #ebebe4;
+    --border: #e8e8e2;
+    --border-strong: #e0e0da;
+    /* ink — secondary tones kept 1:1 with the design; consolidation is a known follow-up */
+    --ink-strong: #000000;
+    --ink: #171c26;
+    --text-2: #6b7380;
+    --text-3: #747474;
+    --text-quiet: #9ea6b2;
+    --text-btn: #636360;
+    --text-ghost: #848484;
+    --mono-dim: #818181;
+    --verb: #868475;
+    /* accent — the bar's violet and the chip language's violet differ in the design */
+    --accent: #604be8;
+    --accent-2: #5957d6;
+    --underline: #a6adff;
+    --chip-bg: #f0f0fc;
+    --chip-border: #bfbff2;
+    --bar-tint: #e8e6ef; /* rgba(96,75,232,.1) flattened over --bg so the sticky bar stays opaque */
+    --load-bg: rgba(89, 87, 214, 0.12);
+    /* status */
+    --green: #4ab268;
+    --amber: #a67308;
+    --red: #db3645;
+    /* response syntax */
+    --code-punct: #838893;
+    --code-key: #366db2;
+    --code-str: #23b440;
+    --code-num: #e79126;
+    --code-hint: #474b57;
     --sans: Inter, system-ui, sans-serif;
-    --green-bg: #e0f5e6; --green-fg: #21894a;
-    --amber-bg: #fdf3d9; --amber-fg: #a67308;
-    --red: #dc3545;
+    --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+    /* legacy names, retired section by section as the restyle lands */
+    --gray: var(--text-2);
+    --light: var(--text-quiet);
+    --accent-soft: var(--chip-bg);
+    --accent-border: var(--chip-border);
+    --tint: var(--bar-tint);
+    --green-bg: var(--bg); --green-fg: var(--green);
+    --amber-bg: var(--bg); --amber-fg: var(--amber);
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); }
-  .page { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .ic { width: 16px; height: 16px; display: block; flex-shrink: 0; }
 
-  /* Header */
-  .header { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 0 20px; }
-  .header h1 { font-size: 26px; margin: 0; }
-  .header .sub { color: var(--gray); font-size: 13px; margin-top: 4px; }
-  .header .utils { display: flex; gap: 8px; }
-  .util-btn { font-size: 12.5px; color: var(--gray); background: #ebebe4; border: none; border-radius: 8px; padding: 8px 12px; cursor: default; }
+  /* Shell: sidebar, title bar, content page */
+  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+  .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+  .account { display: flex; align-items: center; gap: 12px; padding: 8px; }
+  .account .mark { width: 29px; height: 25px; margin-left: 1px; color: #432dd7; }
+  .brand { font-size: 14px; font-weight: 600; letter-spacing: -0.14px; color: var(--ink-strong); }
+  .nav { display: flex; flex-direction: column; gap: 32px; padding: 8px; }
+  .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text-ghost); font-size: 14px; letter-spacing: -0.14px; cursor: default; }
+  .nav-search .ic { color: #4d4d4a; }
+  .nav-list { display: flex; flex-direction: column; gap: 4px; }
+  .nav-row { display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 12px; font-size: 14px; letter-spacing: -0.14px; color: var(--ink-strong); cursor: default; }
+  .nav-row:hover { background: var(--surface-2); }
+
+  .title-bar { display: flex; align-items: center; gap: 20px; padding: 24px; border-bottom: 1px solid var(--border); }
+  .title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .title-bar h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -0.28px; color: var(--ink-strong); }
+  .title-bar .sub { margin: 0; color: var(--text-2); font-size: 12.5px; }
+  .utils { display: flex; gap: 8px; }
+  .util-btn { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 14px; color: var(--text-btn); background: var(--btn); border: none; border-radius: 8px; padding: 8px; cursor: default; }
+  .util-btn .ic { color: #000; }
+
+  .page { padding: 24px 24px 80px; }
 
   /* Bar */
   .bar { display: flex; align-items: center; gap: 10px; background: var(--tint); border-radius: 10px; padding: 8px 8px 8px 14px; position: sticky; top: 8px; z-index: 20; }
@@ -117,18 +165,58 @@
 </style>
 </head>
 <body>
-<div class="page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-mark" viewBox="0 0 28.6775 25.251">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M19.2489 19.9271V14.6559H17.2846V19.9271C17.2846 21.9853 18.9587 23.6594 21.0169 23.6594H21.9983V21.6951H21.0169C20.0426 21.6951 19.2489 20.9015 19.2489 19.9271Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M26.7132 12.6191V17.3342C26.7132 18.3085 25.9209 19.1022 24.9452 19.1022C23.9709 19.1022 23.1772 18.3085 23.1772 17.3342V16.3514V8.83849C23.1772 3.96552 19.2131 0 14.3387 0C9.46433 0 5.50023 3.96552 5.50023 8.83849V17.3342C5.50023 18.3085 4.70656 19.1022 3.73083 19.1022C2.75652 19.1022 1.96427 18.3085 1.96427 17.3342V12.6191H0V17.3342C0 19.3923 1.67411 21.0664 3.73083 21.0664C5.78897 21.0664 7.4645 19.3923 7.4645 17.3342V8.83849C7.4645 5.04793 10.5482 1.96427 14.3387 1.96427C18.1293 1.96427 21.213 5.04793 21.213 8.83849V17.3342C21.213 19.3923 22.8871 21.0664 24.9452 21.0664C27.0033 21.0664 28.6775 19.3923 28.6775 17.3342V12.6191H26.7132Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.357 25.251H15.3212V15.7141H13.357V25.251Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M9.42799 19.9271C9.42799 20.9015 8.63432 21.6951 7.66001 21.6951H6.67859V23.6594H7.66001C9.71815 23.6594 11.3923 21.9853 11.3923 19.9271V14.6559H9.42799V19.9271Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.6844 12.6191H12.9359V9.04047H10.6844V12.6191Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.7422 12.6191H17.9924V9.04047H15.7422V12.6191Z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 16 16"><path d="M7.19567 11.6C8.40967 11.6 9.44722 11.1735 10.3083 10.3205C11.1694 9.46761 11.6 8.42889 11.6 7.20433C11.6 5.99033 11.1705 4.95278 10.3115 4.09167C9.45239 3.23056 8.41522 2.8 7.2 2.8C5.97433 2.8 4.93456 3.2295 4.08067 4.0885C3.22689 4.94761 2.8 5.98478 2.8 7.2C2.8 8.42567 3.2265 9.46544 4.0795 10.3193C4.93239 11.1731 5.97111 11.6 7.19567 11.6ZM7.2 12.8C6.42333 12.8 5.69583 12.6528 5.0175 12.3583C4.33917 12.0639 3.74444 11.6639 3.23333 11.1583C2.72222 10.6528 2.32222 10.0608 2.03333 9.38233C1.74444 8.704 1.6 7.97644 1.6 7.19967C1.6 6.43322 1.74722 5.70833 2.04167 5.025C2.33611 4.34167 2.73489 3.74711 3.238 3.24133C3.74122 2.73544 4.33256 2.33544 5.012 2.04133C5.69156 1.74711 6.42039 1.6 7.1985 1.6C7.96617 1.6 8.69167 1.74722 9.375 2.04167C10.0583 2.33611 10.6528 2.73611 11.1583 3.24167C11.6639 3.74722 12.0639 4.34089 12.3583 5.02267C12.6528 5.70444 12.8 6.43044 12.8 7.20067C12.8 7.86689 12.6892 8.497 12.4677 9.091C12.2462 9.685 11.9403 10.2269 11.55 10.7167L14.4 13.5667L13.55 14.4L10.7 11.5667C10.2134 11.9567 9.67517 12.2597 9.08517 12.4758C8.49506 12.6919 7.86667 12.8 7.2 12.8Z" fill="currentColor"/></symbol>
+  <symbol id="i-download" viewBox="0 0 16 16"><path d="M8 10.6667L4.66667 7.33333L5.6 6.36667L7.33333 8.1V2.66667H8.66667V8.1L10.4 6.36667L11.3333 7.33333L8 10.6667ZM2.66667 13.3333V10H4V12H12V10H13.3333V13.3333H2.66667Z" fill="currentColor"/></symbol>
+  <symbol id="i-arrow-outward" viewBox="0 0 16 16"><g transform="translate(3.33 3.33)"><path d="M0.666667 0V1.33333H6.39333L0 7.72667L0.94 8.66667L7.33333 2.27333V8H8.66667V0H0.666667Z" fill="currentColor"/></g></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 16 16"><path d="M2.66667 8L3.60667 8.94L7.33333 5.22V13.3333H8.66667V5.22L12.3867 8.94667L13.3333 8L8 2.66667L2.66667 8Z" fill="currentColor"/></symbol>
+  <symbol id="i-code" viewBox="0 0 16 16"><path d="M6.26667 11.0667L3.2 8L6.26667 4.93333L5.33333 4L1.33333 8L5.33333 12L6.26667 11.0667ZM9.73333 11.0667L12.8 8L9.73333 4.93333L10.6667 4L14.6667 8L10.6667 12L9.73333 11.0667Z" fill="currentColor"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 16 16"><path d="M4.8 12V1.6H13.6V12H4.8ZM6 10.8H12.4V2.8H6V10.8ZM2.4 14.4V4H3.6V13.2H11.2V14.4H2.4Z" fill="currentColor"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M5.33333 3.33333V12.6667L12.6667 8L5.33333 3.33333Z" fill="currentColor"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 16 16"><path d="M8 4.33333C10.5267 4.33333 12.78 5.75333 13.88 8C12.78 10.2467 10.5333 11.6667 8 11.6667C5.46667 11.6667 3.22 10.2467 2.12 8C3.22 5.75333 5.47333 4.33333 8 4.33333ZM8 3C4.66667 3 1.82 5.07333 0.666667 8C1.82 10.9267 4.66667 13 8 13C11.3333 13 14.18 10.9267 15.3333 8C14.18 5.07333 11.3333 3 8 3ZM8 6.33333C8.92 6.33333 9.66667 7.08 9.66667 8C9.66667 8.92 8.92 9.66667 8 9.66667C7.08 9.66667 6.33333 8.92 6.33333 8C6.33333 7.08 7.08 6.33333 8 6.33333ZM8 5C6.34667 5 5 6.34667 5 8C5 9.65333 6.34667 11 8 11C9.65333 11 11 9.65333 11 8C11 6.34667 9.65333 5 8 5Z" fill="currentColor"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 16 16"><path d="M3.33333 12.6667V8.66667H4.66667V11.3333H7.33333V12.6667H3.33333ZM11.3333 7.33333V4.66667H8.66667V3.33333H12.6667V7.33333H11.3333Z" fill="currentColor"/></symbol>
+</defs></svg>
 
-  <div class="header">
-    <div>
-      <h1>Google Search API</h1>
-      <div class="sub">Real-time Google results as structured JSON.</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="account">
+      <svg class="mark" viewBox="0 0 28.6775 25.251"><use href="#i-mark"/></svg>
+      <span class="brand">Docs</span>
     </div>
-    <div class="utils">
-      <button class="util-btn">OpenAPI spec ↓</button>
-      <button class="util-btn">Postman ↗</button>
+    <nav class="nav">
+      <div class="nav-search"><svg class="ic"><use href="#i-search"/></svg>Search APIs</div>
+      <div class="nav-list">
+        <span class="nav-row">Search engines</span>
+        <span class="nav-row">LLMs</span>
+        <span class="nav-row">Realestate</span>
+        <span class="nav-row">Social networks</span>
+        <span class="nav-row">Ecommerce</span>
+        <span class="nav-row">Support API</span>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="title-bar">
+      <div class="title-text">
+        <h1>Google Search API</h1>
+        <p class="sub">Real-time Google results as structured JSON.</p>
+      </div>
+      <div class="utils">
+        <button class="util-btn">OpenAPI spec <svg class="ic"><use href="#i-download"/></svg></button>
+        <button class="util-btn">Postman <svg class="ic"><use href="#i-arrow-outward"/></svg></button>
+      </div>
     </div>
-  </div>
+
+    <div class="page">
 
   <div class="bar-wrap">
     <div class="bar">
@@ -260,6 +348,8 @@
       <div class="json" id="jsonBody"></div>
     </div>
   </div>
+    </div>
+  </main>
 </div>
 
 <div class="toast" id="toast"></div>
