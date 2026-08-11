@@ -1023,13 +1023,19 @@ $("copyBtn").addEventListener("click", () => {
 });
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
 
-/* Parameters expand to their long form. The whole row is the target, except
-   the control column, which has its own job. */
-document.querySelectorAll(".param").forEach(p => {
+/* Parameters expand to their long form, one at a time like the sidebar groups.
+   The whole row is the target, except the control column, which has its own job. */
+const params = [...document.querySelectorAll(".param")];
+function setParamOpen(p, open) {
+  p.classList.toggle("open", open);
+  p.querySelector(".twist").setAttribute("aria-expanded", String(open));
+}
+params.forEach(p => {
   const row = p.querySelector(".row"), twist = p.querySelector(".twist");
   const toggle = () => {
-    const open = p.classList.toggle("open");
-    twist.setAttribute("aria-expanded", String(open));
+    const opening = !p.classList.contains("open");
+    params.forEach(other => { if (other !== p) setParamOpen(other, false); });
+    setParamOpen(p, opening);
   };
   row.addEventListener("click", e => { if (!e.target.closest(".ctl")) toggle(); });
   twist.addEventListener("click", e => { e.stopPropagation(); toggle(); });
