@@ -60,7 +60,8 @@
     * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; animation: pageIn .45s ease both; }
+  @keyframes pageIn { from { opacity: 0 } to { opacity: 1 } }
   .ic { width: 16px; height: 16px; display: block; flex-shrink: 0; }
 
   /* Shell: sidebar, title bar, content page */
@@ -149,6 +150,12 @@
   .icon-btn:hover { background: #fff; }
   .run-btn { display: flex; align-items: center; gap: 4px; height: 32px; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px; font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer; }
   .run-btn:hover { filter: brightness(1.06); }
+  /* A run takes a beat, and the button says so */
+  .run-btn .spin { display: none; width: 14px; height: 14px; margin: 1px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .55s linear infinite; }
+  .run-btn.working .spin { display: block; }
+  .run-btn.working .ic { display: none; }
+  .run-btn.working { pointer-events: none; }
+  @keyframes spin { to { transform: rotate(360deg) } }
   /* Lives in the band so it stays with the Run button it explains */
   .limit-bar { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 12.5px; color: var(--text-2); animation: rowIn .2s ease both; }
   .limit-bar a { color: var(--accent-2); font-weight: 500; text-decoration: none; }
@@ -167,15 +174,20 @@
   .strip .label { font-size: 12px; font-weight: 500; }
   .strip .q { font-family: var(--mono); font-size: 11px; color: var(--text-2); }
   .strip .expand { margin-left: auto; font-size: 11.5px; color: var(--text-2); }
-  .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; background: var(--bg); }
+  .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; background: var(--bg); transition: color .2s ease; }
+  /* Replayed whenever the status text is swapped, so stale does not just blink in */
+  .chip.swap { animation: chipSwap .26s var(--ease); }
+  @keyframes chipSwap { 0% { opacity: 1 } 35% { opacity: 0; transform: translateY(-2px) } 36% { transform: translateY(2px) } 100% { opacity: 1; transform: none } }
   .chip.ok, .chip.live { color: var(--green); }
   .chip.stale { color: var(--amber); }
 
-  /* Layout: single column at rest, split when response open */
-  .content { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 18px; align-items: start; }
-  .content.split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .content.split.full { grid-template-columns: 1fr; }
-  .content.split.full .ref { display: none; }
+  /* Layout: the response column is always there, just closed to 0fr, which is
+     what lets the split slide open instead of appearing */
+  .content { display: grid; grid-template-columns: minmax(0, 1fr) 0fr; gap: 0; margin-top: 18px; align-items: start;
+             transition: grid-template-columns .26s var(--ease), gap .26s var(--ease); }
+  .content.split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+  .content.split.full { grid-template-columns: 0fr minmax(0, 1fr); }
+  .content.split.full .ref { height: 0; overflow: hidden; }
 
   /* Reference column */
   .ref h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.1; color: var(--ink-strong); margin: 20px 0 12px; }
@@ -245,8 +257,9 @@
   .load-btn:hover { background: rgba(89, 87, 214, 0.18); }
 
   /* Response panel (right column when split) */
-  .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: calc(var(--band) + 16px); }
-  .content.split .panel { display: flex; flex-direction: column; height: calc(100vh - var(--band) - 32px); }
+  /* Present but closed at rest, so the column can animate it open */
+  .panel { display: flex; flex-direction: column; height: 0; min-width: 0; opacity: 0; background: var(--surface); border: 0 solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: calc(var(--band) + 16px); transition: opacity .2s ease; }
+  .content.split .panel { height: calc(100vh - var(--band) - 32px); opacity: 1; border-width: 1px; }
   .panel-h { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid var(--border); }
   .ph-left { display: flex; align-items: center; gap: 8px; }
   .seg { display: flex; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 8px; }
@@ -266,6 +279,13 @@
   .json .hint { color: var(--code-hint); }
   .json .indent1 { padding-left: 16px; } .json .indent2 { padding-left: 32px; } .json .indent3 { padding-left: 48px; }
   .hidden { display: none; }
+  /* The payload settles in just behind the opening split */
+  .json.arriving { animation: panelIn .3s .06s var(--ease) both; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+  /* Waiting state: shape of a response before there is one */
+  .skel { display: flex; flex-direction: column; gap: 11px; padding: 6px 0; }
+  .skel div { height: 11px; border-radius: 4px; background: linear-gradient(90deg, rgba(28,28,25,.05) 25%, rgba(28,28,25,.10) 37%, rgba(28,28,25,.05) 63%); background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite; }
+  @keyframes shimmer { from { background-position: 100% 0 } to { background-position: 0 0 } }
 
   /* Results tab: the view exists, the page behind it does not */
   .panel-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px 40px; text-align: center; }
@@ -459,7 +479,7 @@
       <button class="icon-btn" id="codeBtn" title="View code" aria-label="View code"><svg class="ic"><use href="#i-code"/></svg></button>
       <button class="icon-btn" id="copyBtn" title="Copy request" aria-label="Copy request"><svg class="ic"><use href="#i-copy"/></svg></button>
       <div class="run-wrap">
-        <button class="run-btn" id="runBtn" aria-describedby="runsTip"><svg class="ic"><use href="#i-play"/></svg>Run</button>
+        <button class="run-btn" id="runBtn" aria-describedby="runsTip"><svg class="ic"><use href="#i-play"/></svg><span class="spin"></span>Run</button>
         <span class="tip" id="runsTip" role="tooltip"><b id="runsLeft">4</b> live demo runs left</span>
       </div>
 
@@ -914,6 +934,13 @@ print(response.text)`;
   }
 }
 function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+/* Replay the chip's swap so a status change reads as a change, not a blink */
+let lastChip = "";
+function swapChips() {
+  if (panelChip.textContent === lastChip) return;
+  lastChip = panelChip.textContent;
+  [panelChip, stripChip].forEach(c => { c.classList.remove("swap"); void c.offsetWidth; c.classList.add("swap"); });
+}
 
 function setChips(stale) {
   if (stale) {
@@ -926,6 +953,7 @@ function setChips(stale) {
     panelChip.textContent = "200 OK · 0.8s"; panelChip.className = "chip live";
     stripChip.textContent = "200 OK · 0.8s"; stripChip.className = "chip ok";
   }
+  swapChips();
 }
 
 /* ===== Canned response, rendered smart-open ===== */
@@ -964,18 +992,33 @@ function collapse() {
   content.classList.remove("split"); state.responseOpen = false;
   strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? "coffee (example)" : (state.ranQ || ""));
 }
+/* A live run costs a round trip, so the button spins and the panel holds the
+   shape of a response for a beat. The cached example skips all of that, which
+   is the honest difference between the two. */
+function showSkeleton() {
+  $("jsonBody").innerHTML = '<div class="skel">' +
+    [88, 72, 46, 80, 64, 52, 70].map(w => `<div style="width:${w}%"></div>`).join("") + "</div>";
+}
+function arrive() { const j = $("jsonBody"); j.classList.remove("arriving"); void j.offsetWidth; j.classList.add("arriving"); }
+
 function run() {
   if (!state.q) { qInput.focus(); toast("Type a query first"); return; }
   if (state.runsLeft <= 0) { toast("Demo limit reached. Sign up to keep going."); return; }
+  if (state.busy) return;
+  state.busy = true; $("runBtn").classList.add("working");
   state.runsLeft--; $("runsLeft").textContent = state.runsLeft; flashTip();
   if (state.runsLeft === 0) $("limitBar").classList.remove("hidden");
   state.ranQ = state.q; state.ranDevice = state.device;
   state.hasResponse = true; state.cached = false;
-  renderJson(state.q); setChips(false); openSplit();
+  showSkeleton(); setChips(false); openSplit();
+  setTimeout(() => {
+    renderJson(state.q); arrive();
+    $("runBtn").classList.remove("working"); state.busy = false;
+  }, 520);
 }
 function peek() {
   state.hasResponse = true; state.cached = true;
-  renderJson("coffee"); setChips(false); openSplit();
+  renderJson("coffee"); setChips(false); openSplit(); arrive();
 }
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
 /* Surface the run budget for a beat when it changes, so spending one is felt
