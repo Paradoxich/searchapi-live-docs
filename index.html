@@ -20,7 +20,7 @@
        Prose reads warm; only code and status colours are allowed to be cool. */
     --ink-strong: #000000;
     --ink: #1c1c19;
-    --text-2: #71716c;
+    --text-2: #6d6d68; /* clears AA on all three surfaces: card, page, panel */
     --text-3: #747474;
     --text-quiet: #a6a6a0;
     --text-mid: #636360;
@@ -182,7 +182,7 @@
   /* Same voice as the sidebar's category labels */
   .group-h { display: flex; align-items: center; padding: 0 0 8px; margin: 28px 0 0; font-size: 11px; font-weight: 500; color: var(--text-mid); }
   /* Each group is a card: heading outside it, rows ruled inside */
-  .param-group { border: 1px solid var(--border); border-radius: 8px; }
+  .param-group { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; }
   .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 16px; border-bottom: 1px solid var(--border); }
   .row:last-child { border-bottom: none; }
   .row .name { font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: -0.13px; color: var(--ink); width: 120px; max-width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
