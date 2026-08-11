@@ -122,9 +122,13 @@
   .title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
   .title-bar h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -0.28px; color: var(--ink-strong); }
   .title-bar .sub { margin: 0; color: var(--text-2); font-size: 12.5px; }
-  .utils { display: flex; gap: 8px; }
-  .util-btn { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 13px; color: var(--text-mid); background: var(--btn); border: none; border-radius: 8px; padding: 8px; cursor: default; }
-  .util-btn .ic { color: #000; }
+  /* Doors out of the page, so they sit under the description rather than in the
+     corner where they would outrank Run */
+  .utils { display: flex; gap: 16px; margin-top: 2px; }
+  .util-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--text-mid); cursor: pointer; }
+  .util-link:hover { color: var(--ink); }
+  .util-link .ic { width: 14px; height: 14px; color: var(--text-quiet); }
+  .util-link:hover .ic { color: var(--text-mid); }
 
   .page { padding: 24px 24px 80px; }
 
@@ -413,10 +417,10 @@
       <div class="title-text">
         <h1>Google Search API</h1>
         <p class="sub">Real-time Google results as structured JSON.</p>
-      </div>
-      <div class="utils">
-        <button class="util-btn">OpenAPI spec <svg class="ic"><use href="#i-download"/></svg></button>
-        <button class="util-btn">Postman <svg class="ic"><use href="#i-arrow-outward"/></svg></button>
+        <div class="utils">
+          <a class="util-link">OpenAPI spec <svg class="ic"><use href="#i-download"/></svg></a>
+          <a class="util-link">Postman collection <svg class="ic"><use href="#i-arrow-outward"/></svg></a>
+        </div>
       </div>
     </div>
 
