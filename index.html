@@ -881,7 +881,7 @@
         <span class="chip live" id="panelChip">200 OK · 0.8s</span>
         <span class="spacer"></span>
         <div class="ph-right">
-          <button class="ph-text" id="expandBtn">Expand</button>
+          <button class="ph-text" id="expandBtn">Full width</button>
           <button class="ph-icon" id="collapseBtn" title="Collapse" aria-label="Collapse response"><svg class="ic"><use href="#i-collapse"/></svg></button>
         </div>
       </div>
@@ -1012,7 +1012,7 @@ function openSplit() { content.classList.add("split"); strip.style.display = "no
    brings it back. It also resets Expand, so reopening lands on the split. */
 function collapse() {
   content.classList.remove("split", "full"); state.responseOpen = false;
-  $("expandBtn").textContent = "Expand";
+  $("expandBtn").textContent = "Full width";
   strip.style.display = "flex"; stripQ.textContent = state.cached ? state.cachedQ + " (example)" : (state.ranQ || "");
 }
 /* A live run costs a round trip, so the button spins and the panel holds the
@@ -1076,11 +1076,11 @@ $("previewTab").addEventListener("click", () => showTab(true));
 $("backToJson").addEventListener("click", () => showTab(false));
 
 $("runBtn").addEventListener("click", run);
-/* The label names the view you get, not the state you are in. It avoids
-   "collapse", which the strip control will want for tucking the response away. */
+/* The label names the view you get, not the state you are in. Both names are
+   layouts, so the button cannot be mistaken for the collapse control's undo. */
 $("expandBtn").addEventListener("click", () => {
   const full = content.classList.toggle("full");
-  $("expandBtn").textContent = full ? "Split view" : "Expand";
+  $("expandBtn").textContent = full ? "Split view" : "Full width";
 });
 $("collapseBtn").addEventListener("click", collapse);
 strip.addEventListener("click", openSplit);
