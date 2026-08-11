@@ -49,7 +49,7 @@
     /* One curve for the whole sidebar: quick off the mark, soft landing */
     --ease: cubic-bezier(.32, .72, 0, 1);
     /* Height of the sticky request band, so the response panel can sit under it */
-    --band: 89px;
+    --band: 97px;
   }
   @keyframes rowIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {
@@ -126,7 +126,7 @@
 
   /* The request zone is a sticky band, not a floating bar: content passes
      under an edge instead of behind an object with no floor. */
-  .bar-wrap { position: sticky; top: 0; z-index: 20; margin: -24px -24px 0; padding: 24px 24px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .bar-wrap { position: sticky; top: 0; z-index: 20; margin: -24px -24px 0; padding: 24px; background: var(--bg); border-bottom: 1px solid var(--border); }
 
   /* Bar — the page's one tinted element */
   .bar { position: relative; display: flex; align-items: center; gap: 8px; background: var(--bar-tint); border-radius: 8px; padding: 8px 8px 8px 14px; }
