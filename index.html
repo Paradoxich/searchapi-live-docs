@@ -167,9 +167,8 @@
   .panel-h { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid var(--border); }
   .ph-left { display: flex; align-items: center; gap: 8px; }
   .seg { display: flex; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 8px; }
-  .seg-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 6px; background: none; color: #000; cursor: default; }
-  .seg-btn.active { background: #454542; border: 1px solid #333331; color: #fff; }
-  .seg-btn.disabled { opacity: .6; }
+  .seg-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 6px; background: none; color: #000; cursor: pointer; }
+  .seg-btn.active { background: #454542; border: 1px solid #333331; color: #fff; cursor: default; }
   .panel-h .t { color: var(--ink-strong); font-size: 12px; font-weight: 500; }
   .panel-h .spacer { flex: 1; }
   .ph-right { display: flex; align-items: center; gap: 8px; }
@@ -182,6 +181,15 @@
   .json .hint { color: var(--code-hint); }
   .json .indent1 { padding-left: 16px; } .json .indent2 { padding-left: 32px; } .json .indent3 { padding-left: 48px; }
   .hidden { display: none; }
+
+  /* Results tab: the view exists, the page behind it does not */
+  .panel-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px 40px; text-align: center; }
+  .panel-empty.hidden { display: none; }
+  .empty-ic { width: 20px; height: 20px; color: var(--text-quiet); margin-bottom: 4px; }
+  .empty-t { margin: 0; font-size: 13px; font-weight: 500; color: var(--ink); }
+  .empty-s { margin: 0; max-width: 340px; font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+  .empty-btn { margin-top: 8px; height: 28px; padding: 0 10px; background: var(--load-bg); border: none; border-radius: 8px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--accent-2); cursor: pointer; }
+  .empty-btn:hover { background: rgba(89, 87, 214, 0.18); }
 
   /* Code popover — same surface language as the response panel */
   .code-pop { display: none; position: absolute; right: 0; top: 52px; width: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0; z-index: 30; box-shadow: 0 12px 40px rgba(23,28,38,.14); }
@@ -568,8 +576,8 @@
       <div class="panel-h">
         <div class="ph-left">
           <div class="seg">
-            <button class="seg-btn active" title="JSON" aria-label="JSON view"><svg class="ic"><use href="#i-code"/></svg></button>
-            <button class="seg-btn disabled" title="Rendered page preview — out of prototype scope" aria-label="Results view"><svg class="ic"><use href="#i-eye"/></svg></button>
+            <button class="seg-btn active" id="jsonTab" title="JSON" aria-label="JSON view" aria-pressed="true"><svg class="ic"><use href="#i-code"/></svg></button>
+            <button class="seg-btn" id="previewTab" title="Results preview" aria-label="Results preview" aria-pressed="false"><svg class="ic"><use href="#i-eye"/></svg></button>
           </div>
           <span class="t">Response</span>
         </div>
@@ -583,6 +591,12 @@
         </div>
       </div>
       <div class="json" id="jsonBody"></div>
+      <div class="panel-empty hidden" id="previewBody">
+        <svg class="empty-ic"><use href="#i-eye"/></svg>
+        <p class="empty-t">The rendered results view is not built in this concept</p>
+        <p class="empty-s">This prototype covers the JSON side of the docs. Go back to JSON to keep exploring the response.</p>
+        <button class="empty-btn" id="backToJson">Show JSON</button>
+      </div>
     </div>
   </div>
     </div>
@@ -675,7 +689,7 @@ function renderJson(q) {
 function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
 /* ===== Transitions ===== */
-function openSplit() { content.classList.add("split"); strip.style.display = "none"; state.responseOpen = true; }
+function openSplit() { content.classList.add("split"); strip.style.display = "none"; state.responseOpen = true; showTab(false); }
 /* No collapse control in the design yet; the strip below the bar is its
    landing place once one exists. */
 function collapse() {
@@ -700,6 +714,20 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add
 qInput.addEventListener("input", e => { state.q = e.target.value; syncViews(); });
 $("deviceSel").addEventListener("change", e => { state.device = e.target.value; syncViews(); });
 $("qMirror").addEventListener("click", () => qInput.focus());
+/* JSON / Results tabs. Results is a real view that says what is missing,
+   rather than a dead button with a tooltip. */
+function showTab(preview) {
+  $("jsonBody").classList.toggle("hidden", preview);
+  $("previewBody").classList.toggle("hidden", !preview);
+  $("jsonTab").classList.toggle("active", !preview);
+  $("previewTab").classList.toggle("active", preview);
+  $("jsonTab").setAttribute("aria-pressed", String(!preview));
+  $("previewTab").setAttribute("aria-pressed", String(preview));
+}
+$("jsonTab").addEventListener("click", () => showTab(false));
+$("previewTab").addEventListener("click", () => showTab(true));
+$("backToJson").addEventListener("click", () => showTab(false));
+
 $("runBtn").addEventListener("click", run);
 $("expandBtn").addEventListener("click", () => {
   const full = content.classList.toggle("full");
