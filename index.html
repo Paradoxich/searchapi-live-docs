@@ -134,8 +134,13 @@
   .icon-btn:hover { background: #fff; }
   .run-btn { display: flex; align-items: center; gap: 4px; height: 32px; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px; font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer; }
   .run-btn:hover { filter: brightness(1.06); }
-  .bar-note { font-size: 11px; color: var(--text-quiet); padding: 6px 2px 0 14px; }
-  .bar-note b { font-weight: 500; color: var(--text-2); }
+  /* The run budget lives on the button it belongs to, and shows itself for a
+     beat whenever it changes */
+  .run-wrap { position: relative; display: flex; }
+  .tip { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; white-space: nowrap; background: var(--ink); color: #fff; font-size: 11.5px; padding: 5px 9px; border-radius: 6px; opacity: 0; transform: translateY(-3px); pointer-events: none; transition: opacity .14s ease, transform .14s var(--ease); }
+  .tip b { font-weight: 600; }
+  .run-wrap:hover .tip, .run-btn:focus-visible ~ .tip { opacity: 1; transform: none; transition-delay: .1s; }
+  .tip.show { opacity: 1; transform: none; }
 
   /* Response slot (under bar): rest offer / collapsed strip */
   .slot { margin-top: 10px; }
@@ -407,9 +412,11 @@
       <span class="url">/api/v1/search?engine=google&amp;q=<input id="q" class="q-input" placeholder="try your own query" size="18"><span id="extraParams" class="param"></span></span>
       <button class="icon-btn" id="codeBtn" title="View code" aria-label="View code"><svg class="ic"><use href="#i-code"/></svg></button>
       <button class="icon-btn" id="copyBtn" title="Copy request" aria-label="Copy request"><svg class="ic"><use href="#i-copy"/></svg></button>
-      <button class="run-btn" id="runBtn"><svg class="ic"><use href="#i-play"/></svg>Run</button>
+      <div class="run-wrap">
+        <button class="run-btn" id="runBtn" aria-describedby="runsTip"><svg class="ic"><use href="#i-play"/></svg>Run</button>
+        <span class="tip" id="runsTip" role="tooltip"><b id="runsLeft">4</b> live demo runs left</span>
+      </div>
     </div>
-    <div class="bar-note" id="barNote"><b id="runsLeft">4</b> live demo runs left</div>
 
     <div class="code-pop" id="codePop">
       <div class="ph">Request <span class="spacer"></span>
@@ -750,7 +757,7 @@ function collapse() {
 function run() {
   if (!state.q) { qInput.focus(); toast("Type a query first"); return; }
   if (state.runsLeft <= 0) { toast("Demo limit reached — sign up to keep going"); return; }
-  state.runsLeft--; $("runsLeft").textContent = state.runsLeft;
+  state.runsLeft--; $("runsLeft").textContent = state.runsLeft; flashTip();
   state.ranQ = state.q; state.ranDevice = state.device;
   state.hasResponse = true; state.cached = false;
   renderJson(state.q); setChips(false); openSplit();
@@ -760,6 +767,15 @@ function peek() {
   renderJson("coffee"); setChips(false); openSplit();
 }
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
+/* Surface the run budget for a beat when it changes, so spending one is felt
+   without a line of copy sitting under the bar forever. */
+let tipTimer;
+function flashTip() {
+  const tip = $("runsTip");
+  tip.classList.add("show");
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => tip.classList.remove("show"), 1500);
+}
 
 /* ===== Wiring ===== */
 qInput.addEventListener("input", e => { state.q = e.target.value; syncViews(); });
