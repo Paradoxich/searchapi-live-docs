@@ -225,7 +225,6 @@
      header stays quiet and the only filled button on the page is Run. */
   .ph-text { height: 28px; padding: 0 4px; border: none; border-radius: 6px; background: none; font-family: var(--sans); font-size: 12.5px; color: var(--text-mid); cursor: pointer; transition: color .14s ease; }
   .ph-text:hover { color: var(--ink); }
-  .ph-text[aria-pressed="true"] { color: var(--accent-2); }
   .json { font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--code-punct); padding: 14px 16px 16px; flex: 1; overflow: auto; }
   .json .k { color: var(--code-key); } .json .s { color: var(--code-str); } .json .n { color: var(--code-num); }
   .json .fold { cursor: pointer; user-select: none; }
@@ -664,7 +663,7 @@
         <span class="chip live" id="panelChip">200 OK · 0.8s</span>
         <span class="spacer"></span>
         <div class="ph-right">
-          <button class="ph-text" id="expandBtn" aria-label="Expand response to full width" aria-pressed="false">Expand</button>
+          <button class="ph-text" id="expandBtn">Expand</button>
         </div>
       </div>
       <div class="json" id="jsonBody"></div>
@@ -817,11 +816,11 @@ $("previewTab").addEventListener("click", () => showTab(true));
 $("backToJson").addEventListener("click", () => showTab(false));
 
 $("runBtn").addEventListener("click", run);
-/* Expand stays one word and shows a pressed state, rather than renaming itself
-   to "collapse" and colliding with the collapse control that is still to come. */
+/* The label names the view you get, not the state you are in. It avoids
+   "collapse", which the strip control will want for tucking the response away. */
 $("expandBtn").addEventListener("click", () => {
   const full = content.classList.toggle("full");
-  $("expandBtn").setAttribute("aria-pressed", String(full));
+  $("expandBtn").textContent = full ? "Split view" : "Expand";
 });
 strip.addEventListener("click", openSplit);
 $("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open"));
