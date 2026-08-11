@@ -690,6 +690,31 @@ $("copyBtn").addEventListener("click", () => {
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
 $("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($("jsonBody").innerText); toast("JSON copied"); });
 
+/* Sidebar: cmd/ctrl+K focuses search, typing filters the catalog live.
+   Only Google Search has a page; other rows say so. */
+const navSearch = $("navSearch");
+function filterNav() {
+  const t = navSearch.value.trim().toLowerCase();
+  document.querySelectorAll(".nav-group").forEach(g => {
+    let any = false;
+    g.querySelectorAll(".nav-row").forEach(r => {
+      const hit = !t || r.textContent.toLowerCase().includes(t);
+      r.style.display = hit ? "" : "none";
+      if (hit) any = true;
+    });
+    g.style.display = any ? "" : "none";
+  });
+}
+navSearch.addEventListener("input", filterNav);
+navSearch.addEventListener("keydown", e => {
+  if (e.key === "Escape") { navSearch.value = ""; filterNav(); navSearch.blur(); }
+});
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); navSearch.focus(); navSearch.select(); }
+});
+document.querySelectorAll(".nav-row:not(.active)").forEach(r =>
+  r.addEventListener("click", () => toast("Only Google Search is built in this prototype")));
+
 /* Example cards: "View response" shows the cached example, "Load into
    request" only fills q in the bar — same path as typing it. */
 document.querySelectorAll(".view-response").forEach(a => a.addEventListener("click", peek));
