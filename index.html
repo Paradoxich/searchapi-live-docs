@@ -186,12 +186,13 @@
   .row .name.muted { color: var(--mono-dim); }
   .row .desc { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .content.split .row .desc { display: none; }
-  .content.split .row .name { flex: 1; width: auto; }
+  /* The name absorbs the freed description space, so flags and controls stay in
+     their columns against the right edge instead of drifting with flag length */
+  .content.split .row .name { flex: 1; width: auto; max-width: none; }
   .row .flag { font-size: 11.5px; color: var(--text-quiet); width: 100px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .flag.req { color: var(--red); }
   .row .ctl { width: 128px; flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; }
   .row .ctl .none { font-size: 12px; color: var(--text-quiet); }
-  .content.split .row .flag { width: auto; }
   .pill { font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; font-family: var(--sans); }
   .pill.set { background: var(--chip-bg); border-color: var(--chip-border); color: var(--accent-2); }
   .pill.quiet { border: none; padding: 4px 0; }
