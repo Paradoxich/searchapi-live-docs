@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Search API — live docs prototype</title>
+<style>
+  /* ===== Skeleton styles: structural only, replace freely with the design system ===== */
+  :root {
+    --bg: #f4f4ef;
+    --surface: #ffffff;
+    --ink: #16191f;
+    --gray: #6b7280;
+    --light: #9ca3af;
+    --border: #e2e4e9;
+    --accent: #5b5ad6;
+    --accent-soft: #eeeefc;
+    --accent-border: #c3c3ef;
+    --tint: #e8e6f7;
+    --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+    --sans: Inter, system-ui, sans-serif;
+    --green-bg: #e0f5e6; --green-fg: #21894a;
+    --amber-bg: #fdf3d9; --amber-fg: #a67308;
+    --red: #dc3545;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); }
+  .page { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+
+  /* Header */
+  .header { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 0 20px; }
+  .header h1 { font-size: 26px; margin: 0; }
+  .header .sub { color: var(--gray); font-size: 13px; margin-top: 4px; }
+  .header .utils { display: flex; gap: 8px; }
+  .util-btn { font-size: 12.5px; color: var(--gray); background: #ebebe4; border: none; border-radius: 8px; padding: 8px 12px; cursor: default; }
+
+  /* Bar */
+  .bar { display: flex; align-items: center; gap: 10px; background: var(--tint); border-radius: 10px; padding: 8px 8px 8px 14px; position: sticky; top: 8px; z-index: 20; }
+  .bar .verb { font-family: var(--mono); font-size: 11.5px; color: var(--gray); }
+  .bar .url { flex: 1; font-family: var(--mono); font-size: 13px; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .bar .url::-webkit-scrollbar { display: none; }
+  .bar .url .q-input { font-family: var(--mono); font-size: 13px; color: var(--accent); background: transparent; border: none; border-bottom: 1.5px solid var(--accent-border); outline: none; padding: 0 1px 1px; min-width: 40px; }
+  .bar .url .param { color: var(--accent); }
+  .icon-btn { width: 34px; height: 34px; border-radius: 8px; border: none; background: rgba(255,255,255,.55); cursor: pointer; font-size: 14px; color: var(--ink); }
+  .icon-btn:hover { background: #fff; }
+  .run-btn { display: flex; align-items: center; gap: 6px; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+  .run-btn:hover { filter: brightness(1.06); }
+  .bar-note { font-size: 11px; color: var(--light); padding: 6px 2px 0 14px; }
+
+  /* Response slot (under bar): rest offer / collapsed strip */
+  .slot { margin-top: 10px; }
+  .slot .offer { font-size: 12px; color: var(--light); padding: 6px 14px; }
+  .slot .offer a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .strip { display: none; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .strip .label { font-size: 12px; font-weight: 500; }
+  .strip .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; }
+  .strip .q { font-family: var(--mono); font-size: 11px; color: var(--gray); }
+  .strip .expand { margin-left: auto; font-size: 11.5px; color: var(--gray); }
+  .chip.ok { background: var(--green-bg); color: var(--green-fg); }
+  .chip.stale { background: var(--amber-bg); color: var(--amber-fg); }
+
+  /* Layout: single column at rest, split when response open */
+  .content { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 18px; align-items: start; }
+  .content.split { grid-template-columns: 5fr 7fr; }
+
+  /* Reference column */
+  .ref h2 { font-size: 17px; margin: 18px 0 4px; }
+  .group-h { font-size: 10.5px; letter-spacing: .06em; color: var(--light); font-weight: 600; margin: 22px 0 2px; text-transform: uppercase; }
+  .row { display: flex; align-items: center; gap: 18px; padding: 11px 2px; border-top: 1px solid var(--border); }
+  .row .name { font-family: var(--mono); font-size: 13px; width: 150px; flex-shrink: 0; }
+  .row .desc { flex: 1; font-size: 12.5px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .content.split .row .desc { display: none; }
+  .content.split .row .name { flex: 1; }
+  .row .flag { font-size: 11px; color: var(--light); width: 110px; flex-shrink: 0; }
+  .row .flag.req { color: var(--red); }
+  .row .ctl { width: 160px; flex-shrink: 0; display: flex; justify-content: flex-end; }
+  .content.split .row .flag { width: auto; }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gray); cursor: pointer; font-family: var(--sans); }
+  .pill.set { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent); }
+  .pill.quiet { border: none; }
+  .row.dim { opacity: .55; }
+  select.pill { appearance: none; }
+
+  /* Response panel (right column when split) */
+  .panel { display: none; background: #17181d; border-radius: 10px; overflow: hidden; position: sticky; top: 68px; }
+  .content.split .panel { display: block; }
+  .panel-h { display: flex; align-items: center; gap: 10px; background: #1e2026; padding: 10px 14px; }
+  .panel-h .t { color: #eceef2; font-size: 12.5px; font-weight: 500; }
+  .panel-h .chip { font-size: 10.5px; padding: 3px 8px; border-radius: 10px; }
+  .panel-h .chip.live { background: #143622; color: #7fe0a0; }
+  .panel-h .chip.stale { background: #3a3010; color: #e0c060; }
+  .panel-h .spacer { flex: 1; }
+  .panel-h button { background: none; border: none; color: #8b8f99; font-size: 11.5px; cursor: pointer; }
+  .tabs { display: flex; gap: 2px; background: #1e2026; padding: 0 14px 8px; }
+  .tab { font-size: 11.5px; color: #8b8f99; background: none; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  .tab.active { background: #2a2c34; color: #eceef2; }
+  .tab.disabled { opacity: .4; cursor: default; }
+  .json { font-family: var(--mono); font-size: 12px; line-height: 1.75; color: #9aa0ab; padding: 14px 16px 18px; overflow-x: auto; }
+  .json .k { color: #8db8ff; } .json .s { color: #99d9a6; } .json .n { color: #f2bf80; }
+  .json .fold { cursor: pointer; user-select: none; }
+  .json .hint { color: #5c616b; }
+  .json .indent1 { padding-left: 16px; } .json .indent2 { padding-left: 32px; } .json .indent3 { padding-left: 48px; }
+  .hidden { display: none; }
+
+  /* Code popover */
+  .code-pop { display: none; position: absolute; right: 0; top: 44px; width: 520px; background: #17181d; border-radius: 10px; padding: 0; z-index: 30; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .code-pop.open { display: block; }
+  .code-pop .ph { display: flex; gap: 10px; align-items: center; background: #1e2026; border-radius: 10px 10px 0 0; padding: 10px 14px; color: #eceef2; font-size: 12px; }
+  .code-pop .ph .spacer { flex: 1; }
+  .code-pop .ph select { background: #2a2c34; color: #cfd3da; border: none; border-radius: 6px; font-size: 11px; padding: 3px 6px; }
+  .code-pop pre { margin: 0; padding: 14px 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: #cfd3da; overflow-x: auto; }
+  .code-pop .lv { color: #a7aaf7; border-bottom: 1px solid #5b5ad6; }
+  .bar-wrap { position: relative; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div>
+      <h1>Google Search API</h1>
+      <div class="sub">Real-time Google results as structured JSON.</div>
+    </div>
+    <div class="utils">
+      <button class="util-btn">OpenAPI spec ↓</button>
+      <button class="util-btn">Postman ↗</button>
+    </div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar">
+      <span class="verb">GET</span>
+      <span class="url">/api/v1/search?engine=google&amp;q=<input id="q" class="q-input" placeholder="try your own query" size="18"><span id="extraParams" class="param"></span></span>
+      <button class="icon-btn" id="codeBtn" title="View code">&lt;/&gt;</button>
+      <button class="icon-btn" id="copyBtn" title="Copy request">⧉</button>
+      <button class="run-btn" id="runBtn">▶ Run</button>
+    </div>
+    <div class="bar-note" id="barNote">Runs live, no key needed · Copy inserts YOUR_API_KEY · <b id="runsLeft">4</b> demo runs left</div>
+
+    <div class="code-pop" id="codePop">
+      <div class="ph">Request <span class="spacer"></span>
+        <select><option>Python</option><option>Node</option><option>Ruby</option><option>cURL</option></select>
+        <button class="tab" id="copyCode" style="color:#8b8f99">Copy</button>
+      </div>
+      <pre id="codeBody"></pre>
+    </div>
+  </div>
+
+  <!-- Response slot: offer at rest, strip when collapsed -->
+  <div class="slot">
+    <div class="offer" id="offer">Response appears here — run your own query, or <a id="peekLink">view an example (cached)</a></div>
+    <div class="strip" id="strip">
+      <span class="label">Response</span>
+      <span class="chip ok" id="stripChip">200 OK · 0.8s</span>
+      <span class="q" id="stripQ"></span>
+      <span class="expand">⌄ expand</span>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="ref">
+      <h2>API parameters</h2>
+
+      <div class="group-h">Search query</div>
+      <div class="row">
+        <span class="name">q</span>
+        <span class="desc">Terms to search. Operators work: "exact", site:, inurl:, intitle:, AND, OR.</span>
+        <span class="flag req">required</span>
+        <span class="ctl"><button class="pill set" id="qMirror">try your own query</button></span>
+      </div>
+      <div class="row">
+        <span class="name">kgmid</span>
+        <span class="desc">Knowledge Graph id (/m/ location, /g/ entity).</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+
+      <div class="group-h">Device</div>
+      <div class="row">
+        <span class="name">device</span>
+        <span class="desc">desktop | mobile | tablet.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl">
+          <select class="pill" id="deviceSel">
+            <option value="">desktop</option>
+            <option value="mobile">mobile</option>
+            <option value="tablet">tablet</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="group-h">Geographic location</div>
+      <div class="row">
+        <span class="name">location</span>
+        <span class="desc">Canonical location of the search. Sets uule automatically.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+      <div class="row">
+        <span class="name">uule</span>
+        <span class="desc">Exact encoded location. Cannot be combined with location.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+
+      <div class="group-h">Localization</div>
+      <div class="row dim">
+        <span class="name">google_domain</span>
+        <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
+        <span class="flag">deprecated</span>
+        <span class="ctl"><span style="color:var(--light);font-size:12px">—</span></span>
+      </div>
+      <div class="row">
+        <span class="name">gl</span>
+        <span class="desc">Country of the search.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">us ▾</button></span>
+      </div>
+      <div class="row">
+        <span class="name">hl</span>
+        <span class="desc">Interface language of the search.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">en ▾</button></span>
+      </div>
+
+      <div class="group-h">Filters</div>
+      <div class="row">
+        <span class="name">safe</span>
+        <span class="desc">SafeSearch: active | blur | off.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">blur ▾</button></span>
+      </div>
+      <div class="row">
+        <span class="name">time_period</span>
+        <span class="desc">last_1_minute … last_year, or custom via min/max.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+
+      <div class="group-h" style="color:#bbb">… remaining groups as in the full design</div>
+    </div>
+
+    <!-- Response panel: right column when split -->
+    <div class="panel" id="panel">
+      <div class="panel-h">
+        <span class="t">Response</span>
+        <span class="chip live" id="panelChip">200 OK · 0.8s</span>
+        <span class="spacer"></span>
+        <button id="copyJson">Copy</button>
+        <button>Download</button>
+        <button id="collapseBtn">— collapse</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active">JSON</button>
+        <button class="tab disabled" title="Rendered page preview — out of prototype scope">Results</button>
+      </div>
+      <div class="json" id="jsonBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== State ===== */
+const state = {
+  q: "",
+  device: "",
+  ranQ: null,          // q value the current response belongs to
+  ranDevice: null,
+  responseOpen: false, // split visible
+  hasResponse: false,  // a response exists (open or collapsed)
+  cached: false,       // current response is the cached example
+  runsLeft: 4
+};
+
+const $ = id => document.getElementById(id);
+const qInput = $("q"), extra = $("extraParams"), content = $("content"),
+      panel = $("panel"), strip = $("strip"), offer = $("offer"),
+      stripChip = $("stripChip"), stripQ = $("stripQ"), panelChip = $("panelChip");
+
+/* ===== Three synced views: URL, q-row mirror, code ===== */
+function syncViews() {
+  extra.textContent = state.device ? "&device=" + state.device : "";
+  $("qMirror").textContent = state.q || "try your own query";
+  $("codeBody").innerHTML =
+`import requests
+
+url = "https://www.searchapi.io/api/v1/search"
+params = {
+    "engine": "google",
+    "q": "<span class="lv">${esc(state.q) || "try your own query"}</span>",${state.device ? `\n    "device": "<span class="lv">${state.device}</span>",` : ""}
+    "api_key": "YOUR_API_KEY"
+}
+
+response = requests.get(url, params=params)
+print(response.text)`;
+  // stale check
+  if (state.hasResponse && !state.cached) {
+    const stale = state.q !== state.ranQ || state.device !== state.ranDevice;
+    setChips(stale);
+  }
+}
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+function setChips(stale) {
+  if (stale) {
+    panelChip.textContent = "stale · request changed"; panelChip.className = "chip stale";
+    stripChip.textContent = "stale · request changed"; stripChip.className = "chip stale";
+  } else if (state.cached) {
+    panelChip.textContent = "example · cached"; panelChip.className = "chip stale";
+    stripChip.textContent = "example · cached"; stripChip.className = "chip stale";
+  } else {
+    panelChip.textContent = "200 OK · 0.8s"; panelChip.className = "chip live";
+    stripChip.textContent = "200 OK · 0.8s"; stripChip.className = "chip ok";
+  }
+}
+
+/* ===== Canned response, rendered smart-open ===== */
+function renderJson(q) {
+  const title = q ? cap(q) + " — Wikipedia" : "Santolina — Wikipedia";
+  const link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(cap(q||"Santolina").split(" ")[0]);
+  $("jsonBody").innerHTML =
+`{
+<div class="indent1 fold" data-t="meta">▸ <span class="k">"search_metadata"</span>: { … }, <span class="hint">id, timing, stored urls</span></div><div class="indent2 hidden" data-b="meta"><span class="k">"id"</span>: <span class="s">"search_m3WR9zk90…"</span>, <span class="k">"created_at"</span>: <span class="s">"2026-08-11T…"</span>, <span class="k">"request_time_taken"</span>: <span class="n">0.71</span></div>
+<div class="indent1 fold" data-t="params">▸ <span class="k">"search_parameters"</span>: { … }, <span class="hint">q + applied defaults gl, hl, device</span></div><div class="indent2 hidden" data-b="params"><span class="k">"q"</span>: <span class="s">"${esc(q)||"santolina plant"}"</span>, <span class="k">"device"</span>: <span class="s">"${state.ranDevice||"desktop"}"</span>, <span class="k">"gl"</span>: <span class="s">"us"</span>, <span class="k">"hl"</span>: <span class="s">"en"</span></div>
+<div class="indent1">▾ <span class="k">"organic_results"</span>: [ <span class="hint">10 items</span></div>
+<div class="indent2">▾ {</div>
+<div class="indent3"><span class="k">"position"</span>: <span class="n">1</span>,</div>
+<div class="indent3"><span class="k">"title"</span>: <span class="s">"${esc(title)}"</span>,</div>
+<div class="indent3"><span class="k">"link"</span>: <span class="s">"${esc(link)}"</span>,</div>
+<div class="indent3"><span class="k">"snippet"</span>: <span class="s">"${esc(cap(q)||"Santolina")} is a …"</span></div>
+<div class="indent2">},</div>
+<div class="indent2 hint">▸ { … } × 9 more</div>
+<div class="indent1">],</div>
+<div class="indent1 fold" data-t="rel">▸ <span class="k">"related_searches"</span>: [ … ], <span class="hint">8 items</span></div><div class="indent2 hidden" data-b="rel"><span class="s">"${esc(q)||"santolina"} care"</span>, <span class="s">"${esc(q)||"santolina"} pruning"</span>, …</div>
+<div class="indent1 fold" data-t="kg">▸ <span class="k">"knowledge_graph"</span>: { … }</div><div class="indent2 hidden" data-b="kg"><span class="k">"title"</span>: <span class="s">"${esc(cap(q)||"Santolina")}"</span>, <span class="k">"type"</span>: <span class="s">"Topic"</span></div>
+}`;
+  document.querySelectorAll(".fold").forEach(f => f.onclick = () => {
+    const b = document.querySelector(`[data-b="${f.dataset.t}"]`);
+    b.classList.toggle("hidden");
+    f.innerHTML = f.innerHTML.replace(b.classList.contains("hidden") ? "▾" : "▸", b.classList.contains("hidden") ? "▸" : "▾");
+  });
+}
+function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+
+/* ===== Transitions ===== */
+function openSplit() { content.classList.add("split"); strip.style.display = "none"; offer.style.display = "none"; state.responseOpen = true; }
+function collapse() {
+  content.classList.remove("split"); state.responseOpen = false;
+  strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? "coffee (example)" : (state.ranQ || ""));
+}
+function run() {
+  if (!state.q) { qInput.focus(); toast("Type a query first"); return; }
+  if (state.runsLeft <= 0) { toast("Demo limit reached — sign up to keep going"); return; }
+  state.runsLeft--; $("runsLeft").textContent = state.runsLeft;
+  state.ranQ = state.q; state.ranDevice = state.device;
+  state.hasResponse = true; state.cached = false;
+  renderJson(state.q); setChips(false); openSplit();
+}
+function peek() {
+  state.hasResponse = true; state.cached = true;
+  renderJson("coffee"); setChips(false); openSplit();
+}
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
+
+/* ===== Wiring ===== */
+qInput.addEventListener("input", e => { state.q = e.target.value; syncViews(); });
+$("deviceSel").addEventListener("change", e => { state.device = e.target.value; syncViews(); });
+$("qMirror").addEventListener("click", () => qInput.focus());
+$("runBtn").addEventListener("click", run);
+$("peekLink").addEventListener("click", peek);
+$("collapseBtn").addEventListener("click", collapse);
+strip.addEventListener("click", openSplit);
+$("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open"));
+document.addEventListener("click", e => { if (!e.target.closest(".bar-wrap")) $("codePop").classList.remove("open"); });
+$("copyBtn").addEventListener("click", () => {
+  const url = `https://www.searchapi.io/api/v1/search?engine=google&q=${encodeURIComponent(state.q||"")}${state.device?`&device=${state.device}`:""}&api_key=YOUR_API_KEY`;
+  navigator.clipboard.writeText(url); toast("Copied — with YOUR_API_KEY placeholder");
+});
+$("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
+$("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($("jsonBody").innerText); toast("JSON copied"); });
+
+syncViews();
+</script>
+</body>
+</html>
