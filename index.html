@@ -220,9 +220,11 @@
   .panel-h .t { color: var(--ink-strong); font-size: 12px; font-weight: 500; }
   .panel-h .spacer { flex: 1; }
   .ph-right { display: flex; align-items: center; gap: 8px; }
-  .ph-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 7px; background: var(--btn); color: #000; cursor: pointer; }
-  .ph-btn.ghost { background: none; }
-  .ph-btn:hover { background: #e4e4dc; }
+  /* Words, not icons: the panel has room, and it stops the response actions
+     rhyming with the request bar's icon strip */
+  .ph-text { height: 28px; padding: 0 10px; border: none; border-radius: 7px; background: var(--btn); font-family: var(--sans); font-size: 12.5px; color: var(--text-mid); cursor: pointer; transition: background-color .14s ease, color .14s ease; }
+  .ph-text:hover { background: #e4e4dc; color: var(--ink); }
+  .ph-text[aria-pressed="true"] { background: var(--load-bg); color: var(--accent-2); }
   .json { font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--code-punct); padding: 14px 16px 16px; flex: 1; overflow: auto; }
   .json .k { color: var(--code-key); } .json .s { color: var(--code-str); } .json .n { color: var(--code-num); }
   .json .fold { cursor: pointer; user-select: none; }
@@ -661,9 +663,8 @@
         <span class="chip live" id="panelChip">200 OK · 0.8s</span>
         <span class="spacer"></span>
         <div class="ph-right">
-          <button class="ph-btn" title="Download JSON" aria-label="Download JSON"><svg class="ic"><use href="#i-download"/></svg></button>
-          <button class="ph-btn" id="copyJson" title="Copy JSON" aria-label="Copy JSON"><svg class="ic"><use href="#i-copy"/></svg></button>
-          <button class="ph-btn ghost" id="expandBtn" title="Full width" aria-label="Expand response to full width" aria-pressed="false"><svg class="ic"><use href="#i-expand"/></svg></button>
+          <button class="ph-text" id="copyJson">Copy</button>
+          <button class="ph-text" id="expandBtn" aria-label="Expand response to full width" aria-pressed="false">Expand</button>
         </div>
       </div>
       <div class="json" id="jsonBody"></div>
@@ -816,11 +817,11 @@ $("previewTab").addEventListener("click", () => showTab(true));
 $("backToJson").addEventListener("click", () => showTab(false));
 
 $("runBtn").addEventListener("click", run);
+/* Expand stays one word and shows a pressed state, rather than renaming itself
+   to "collapse" and colliding with the collapse control that is still to come. */
 $("expandBtn").addEventListener("click", () => {
   const full = content.classList.toggle("full");
-  const b = $("expandBtn");
-  b.setAttribute("aria-pressed", String(full));
-  b.title = full ? "Exit full width" : "Full width";
+  $("expandBtn").setAttribute("aria-pressed", String(full));
 });
 strip.addEventListener("click", openSplit);
 $("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open"));
