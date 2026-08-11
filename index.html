@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Google Search API — live docs prototype</title>
+<title>Google Search API · live docs prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
@@ -140,6 +140,10 @@
   .icon-btn:hover { background: #fff; }
   .run-btn { display: flex; align-items: center; gap: 4px; height: 32px; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px; font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer; }
   .run-btn:hover { filter: brightness(1.06); }
+  /* Lives in the band so it stays with the Run button it explains */
+  .limit-bar { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 12.5px; color: var(--text-2); animation: rowIn .2s ease both; }
+  .limit-bar a { color: var(--accent-2); font-weight: 500; text-decoration: none; }
+  .limit-bar a:hover { text-decoration: underline; }
   /* The run budget lives on the button it belongs to, and shows itself for a
      beat whenever it changes */
   .run-wrap { position: relative; display: flex; }
@@ -430,6 +434,11 @@
         </div>
         <pre id="codeBody"></pre>
       </div>
+    </div>
+
+    <div class="limit-bar hidden" id="limitBar" role="status">
+      <span>Demo limit reached.</span>
+      <a href="https://www.searchapi.io/" target="_blank" rel="noopener">Sign up to keep going</a>
     </div>
   </div>
 
@@ -726,7 +735,7 @@ function setChips(stale) {
 
 /* ===== Canned response, rendered smart-open ===== */
 function renderJson(q) {
-  const title = q ? cap(q) + " — Wikipedia" : "Santolina — Wikipedia";
+  const title = q ? cap(q) + " - Wikipedia" : "Santolina - Wikipedia";
   const link = "https://en.wikipedia.org/wiki/" + encodeURIComponent(cap(q||"Santolina").split(" ")[0]);
   $("jsonBody").innerHTML =
 `{
@@ -762,8 +771,9 @@ function collapse() {
 }
 function run() {
   if (!state.q) { qInput.focus(); toast("Type a query first"); return; }
-  if (state.runsLeft <= 0) { toast("Demo limit reached — sign up to keep going"); return; }
+  if (state.runsLeft <= 0) { toast("Demo limit reached. Sign up to keep going."); return; }
   state.runsLeft--; $("runsLeft").textContent = state.runsLeft; flashTip();
+  if (state.runsLeft === 0) $("limitBar").classList.remove("hidden");
   state.ranQ = state.q; state.ranDevice = state.device;
   state.hasResponse = true; state.cached = false;
   renderJson(state.q); setChips(false); openSplit();
@@ -814,7 +824,7 @@ $("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open
 document.addEventListener("click", e => { if (!e.target.closest(".bar-wrap")) $("codePop").classList.remove("open"); });
 $("copyBtn").addEventListener("click", () => {
   const url = `https://www.searchapi.io/api/v1/search?engine=google&q=${encodeURIComponent(state.q||"")}${state.device?`&device=${state.device}`:""}&api_key=YOUR_API_KEY`;
-  navigator.clipboard.writeText(url); toast("Copied — with YOUR_API_KEY placeholder");
+  navigator.clipboard.writeText(url); toast("Copied with a YOUR_API_KEY placeholder");
 });
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
 $("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($("jsonBody").innerText); toast("JSON copied"); });
@@ -905,6 +915,13 @@ document.querySelectorAll(".load-btn").forEach(b => b.addEventListener("click", 
   window.scrollTo({ top: 0, behavior: "smooth" });
   qInput.focus({ preventScroll: true });
 }));
+
+/* The band grows when the limit bar appears, so let it report its own height
+   rather than keeping a magic number in the stylesheet. */
+const bandEl = document.querySelector(".bar-wrap");
+new ResizeObserver(() =>
+  document.documentElement.style.setProperty("--band", bandEl.offsetHeight + "px")
+).observe(bandEl);
 
 syncViews();
 </script>
