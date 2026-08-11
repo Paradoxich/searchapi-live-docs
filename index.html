@@ -180,8 +180,11 @@
   /* Reference column */
   .ref h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.1; color: var(--ink-strong); margin: 20px 0 12px; }
   /* Same voice as the sidebar's category labels */
-  .group-h { display: flex; align-items: center; height: 48px; padding: 16px 0 8px; margin: 0; font-size: 11px; font-weight: 500; color: var(--text-mid); border-bottom: 1px solid var(--border); }
-  .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 4px; border-bottom: 1px solid var(--border); }
+  .group-h { display: flex; align-items: center; padding: 0 0 8px; margin: 28px 0 0; font-size: 11px; font-weight: 500; color: var(--text-mid); }
+  /* Each group is a card: heading outside it, rows ruled inside */
+  .param-group { border: 1px solid var(--border); border-radius: 12px; }
+  .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 16px; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
   .row .name { font-family: var(--mono); font-weight: 500; font-size: 13px; letter-spacing: -0.13px; color: var(--ink); width: 120px; max-width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .name.muted { color: var(--mono-dim); }
   .row .desc { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -471,151 +474,167 @@
       </div>
 
       <div class="group-h">Search query</div>
-      <div class="row">
-        <span class="name">q</span>
-        <span class="flag req">required</span>
-        <span class="desc">Terms to search. Operators work: "exact", site:, inurl:, intitle:, AND, OR.</span>
-        <span class="ctl"><button class="pill set" id="qMirror">try your own query</button></span>
-      </div>
-      <div class="row">
-        <span class="name">kgmid</span>
-        <span class="flag">optional</span>
-        <span class="desc">Knowledge Graph id (/m/ location, /g/ entity).</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">q</span>
+          <span class="flag req">required</span>
+          <span class="desc">Terms to search. Operators work: "exact", site:, inurl:, intitle:, AND, OR.</span>
+          <span class="ctl"><button class="pill set" id="qMirror">try your own query</button></span>
+        </div>
+        <div class="row">
+          <span class="name">kgmid</span>
+          <span class="flag">optional</span>
+          <span class="desc">Knowledge Graph id (/m/ location, /g/ entity).</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
       </div>
 
       <div class="group-h">Device</div>
-      <div class="row">
-        <span class="name">device</span>
-        <span class="flag">optional</span>
-        <span class="desc">desktop | mobile | tablet.</span>
-        <span class="ctl">
-          <select class="pill" id="deviceSel">
-            <option value="">desktop</option>
-            <option value="mobile">mobile</option>
-            <option value="tablet">tablet</option>
-          </select>
-        </span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">device</span>
+          <span class="flag">optional</span>
+          <span class="desc">desktop | mobile | tablet.</span>
+          <span class="ctl">
+            <select class="pill" id="deviceSel">
+              <option value="">desktop</option>
+              <option value="mobile">mobile</option>
+              <option value="tablet">tablet</option>
+            </select>
+          </span>
+        </div>
       </div>
 
       <div class="group-h">Geographic location</div>
-      <div class="row">
-        <span class="name">location</span>
-        <span class="flag">optional</span>
-        <span class="desc">Canonical location of the search. Sets uule automatically.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row">
-        <span class="name">uule</span>
-        <span class="flag">optional</span>
-        <span class="desc">Exact encoded location. Cannot be combined with location.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">location</span>
+          <span class="flag">optional</span>
+          <span class="desc">Canonical location of the search. Sets uule automatically.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row">
+          <span class="name">uule</span>
+          <span class="flag">optional</span>
+          <span class="desc">Exact encoded location. Cannot be combined with location.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
       </div>
 
       <div class="group-h">Localization</div>
-      <div class="row">
-        <span class="name">gl</span>
-        <span class="flag">optional</span>
-        <span class="desc">Country of the search.</span>
-        <span class="ctl"><button class="pill">us ▾</button></span>
-      </div>
-      <div class="row">
-        <span class="name">hl</span>
-        <span class="flag">optional</span>
-        <span class="desc">Interface language of the search.</span>
-        <span class="ctl"><button class="pill">en ▾</button></span>
-      </div>
-      <div class="row">
-        <span class="name">lr</span>
-        <span class="flag">optional</span>
-        <span class="desc">Restrict to document language(s), lang_XX, combinable with |.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row">
-        <span class="name">cr</span>
-        <span class="flag">optional</span>
-        <span class="desc">Restrict to documents originating in a country.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row dim">
-        <span class="name">google_domain</span>
-        <span class="flag">deprecated</span>
-        <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
-        <span class="ctl"><span class="none">—</span></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">gl</span>
+          <span class="flag">optional</span>
+          <span class="desc">Country of the search.</span>
+          <span class="ctl"><button class="pill">us ▾</button></span>
+        </div>
+        <div class="row">
+          <span class="name">hl</span>
+          <span class="flag">optional</span>
+          <span class="desc">Interface language of the search.</span>
+          <span class="ctl"><button class="pill">en ▾</button></span>
+        </div>
+        <div class="row">
+          <span class="name">lr</span>
+          <span class="flag">optional</span>
+          <span class="desc">Restrict to document language(s), lang_XX, combinable with |.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row">
+          <span class="name">cr</span>
+          <span class="flag">optional</span>
+          <span class="desc">Restrict to documents originating in a country.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row dim">
+          <span class="name">google_domain</span>
+          <span class="flag">deprecated</span>
+          <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
+          <span class="ctl"><span class="none">—</span></span>
+        </div>
       </div>
 
       <div class="group-h">Filters</div>
-      <div class="row">
-        <span class="name">nfpr</span>
-        <span class="flag">optional</span>
-        <span class="desc">Exclude auto-corrected (spelling) results.</span>
-        <span class="ctl"><button class="pill">0 · include</button></span>
-      </div>
-      <div class="row">
-        <span class="name">filter</span>
-        <span class="flag">optional</span>
-        <span class="desc">Duplicate Content and Host Crowding filters.</span>
-        <span class="ctl"><button class="pill">1 · on</button></span>
-      </div>
-      <div class="row">
-        <span class="name">safe</span>
-        <span class="flag">optional</span>
-        <span class="desc">SafeSearch: active | blur | off.</span>
-        <span class="ctl"><button class="pill">blur ▾</button></span>
-      </div>
-      <div class="row">
-        <span class="name">time_period</span>
-        <span class="flag">optional</span>
-        <span class="desc">last_1_minute … last_year, or custom via min/max.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row">
-        <span class="name">time_period_min</span>
-        <span class="flag">optional</span>
-        <span class="desc">Custom start, MM/DD/YYYY.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row">
-        <span class="name">time_period_max</span>
-        <span class="flag">optional</span>
-        <span class="desc">Custom end, MM/DD/YYYY.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
-      </div>
-      <div class="row">
-        <span class="name">verbatim</span>
-        <span class="flag">optional</span>
-        <span class="desc">Exact keywords only. Stricter than nfpr.</span>
-        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">nfpr</span>
+          <span class="flag">optional</span>
+          <span class="desc">Exclude auto-corrected (spelling) results.</span>
+          <span class="ctl"><button class="pill">0 · include</button></span>
+        </div>
+        <div class="row">
+          <span class="name">filter</span>
+          <span class="flag">optional</span>
+          <span class="desc">Duplicate Content and Host Crowding filters.</span>
+          <span class="ctl"><button class="pill">1 · on</button></span>
+        </div>
+        <div class="row">
+          <span class="name">safe</span>
+          <span class="flag">optional</span>
+          <span class="desc">SafeSearch: active | blur | off.</span>
+          <span class="ctl"><button class="pill">blur ▾</button></span>
+        </div>
+        <div class="row">
+          <span class="name">time_period</span>
+          <span class="flag">optional</span>
+          <span class="desc">last_1_minute … last_year, or custom via min/max.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row">
+          <span class="name">time_period_min</span>
+          <span class="flag">optional</span>
+          <span class="desc">Custom start, MM/DD/YYYY.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row">
+          <span class="name">time_period_max</span>
+          <span class="flag">optional</span>
+          <span class="desc">Custom end, MM/DD/YYYY.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
+        <div class="row">
+          <span class="name">verbatim</span>
+          <span class="flag">optional</span>
+          <span class="desc">Exact keywords only. Stricter than nfpr.</span>
+          <span class="ctl"><button class="pill quiet">+ set</button></span>
+        </div>
       </div>
 
       <div class="group-h">Pagination</div>
-      <div class="row">
-        <span class="name">page</span>
-        <span class="flag">optional</span>
-        <span class="desc">Which page of results.</span>
-        <span class="ctl"><button class="pill">1</button></span>
-      </div>
-      <div class="row dim">
-        <span class="name muted">num</span>
-        <span class="flag">constant</span>
-        <span class="desc">Fixed by Google since Sep 2025. Rank Tracking API for num=100.</span>
-        <span class="ctl"><button class="pill muted">10</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">page</span>
+          <span class="flag">optional</span>
+          <span class="desc">Which page of results.</span>
+          <span class="ctl"><button class="pill">1</button></span>
+        </div>
+        <div class="row dim">
+          <span class="name muted">num</span>
+          <span class="flag">constant</span>
+          <span class="desc">Fixed by Google since Sep 2025. Rank Tracking API for num=100.</span>
+          <span class="ctl"><button class="pill muted">10</button></span>
+        </div>
       </div>
 
       <div class="group-h">Optimization</div>
-      <div class="row">
-        <span class="name">optimization_strategy</span>
-        <span class="flag">optional</span>
-        <span class="desc">performance | ads.</span>
-        <span class="ctl"><button class="pill">performance ▾</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name">optimization_strategy</span>
+          <span class="flag">optional</span>
+          <span class="desc">performance | ads.</span>
+          <span class="ctl"><button class="pill">performance ▾</button></span>
+        </div>
       </div>
 
       <div class="group-h">Zero data retention</div>
-      <div class="row">
-        <span class="name muted">zero_retention</span>
-        <span class="flag">Enterprise only</span>
-        <span class="desc">No logging or storage of parameters, HTML, or JSON.</span>
-        <span class="ctl"><button class="pill">🔒 Enterprise</button></span>
+      <div class="param-group">
+        <div class="row">
+          <span class="name muted">zero_retention</span>
+          <span class="flag">Enterprise only</span>
+          <span class="desc">No logging or storage of parameters, HTML, or JSON.</span>
+          <span class="ctl"><button class="pill">🔒 Enterprise</button></span>
+        </div>
       </div>
 
       <section class="examples">
