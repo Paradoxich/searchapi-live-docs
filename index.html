@@ -242,7 +242,9 @@
 
   /* Examples */
   .examples { margin-top: 64px; }
-  .examples h2 { margin: 0 0 24px; }
+  .examples h2 { margin: 0 0 8px; }
+  /* Names the result types the playground cannot advertise on its own */
+  .section-note { margin: 0 0 24px; max-width: 640px; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
   .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .content.split .cards { grid-template-columns: 1fr; }
   .card { display: flex; flex-direction: column; gap: 32px; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
@@ -823,6 +825,7 @@
 
       <section class="examples">
         <h2>Examples</h2>
+        <p class="section-note">A response can carry more than organic results: knowledge graphs, answer boxes, AI overviews, local packs, sports and finance results.</p>
         <div class="cards">
           <article class="card">
             <div class="card-body">
