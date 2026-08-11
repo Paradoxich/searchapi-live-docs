@@ -91,8 +91,6 @@
 
   /* Response slot (under bar): rest offer / collapsed strip */
   .slot { margin-top: 10px; }
-  .slot .offer { font-size: 12px; color: var(--text-quiet); padding: 6px 14px; }
-  .slot .offer a { color: var(--accent-2); cursor: pointer; text-decoration: none; }
   .strip { display: none; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
   .strip .label { font-size: 12px; font-weight: 500; }
   .strip .q { font-family: var(--mono); font-size: 11px; color: var(--text-2); }
@@ -252,9 +250,8 @@
     </div>
   </div>
 
-  <!-- Response slot: offer at rest, strip when collapsed -->
+  <!-- Response slot: strip when collapsed -->
   <div class="slot">
-    <div class="offer" id="offer">Response appears here — run your own query, or <a id="peekLink">view an example (cached)</a></div>
     <div class="strip" id="strip">
       <span class="label">Response</span>
       <span class="chip ok" id="stripChip">200 OK · 0.8s</span>
@@ -498,7 +495,7 @@ const state = {
 
 const $ = id => document.getElementById(id);
 const qInput = $("q"), extra = $("extraParams"), content = $("content"),
-      panel = $("panel"), strip = $("strip"), offer = $("offer"),
+      panel = $("panel"), strip = $("strip"),
       stripChip = $("stripChip"), stripQ = $("stripQ"), panelChip = $("panelChip");
 
 /* ===== Three synced views: URL, q-row mirror, code ===== */
@@ -567,7 +564,7 @@ function renderJson(q) {
 function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
 /* ===== Transitions ===== */
-function openSplit() { content.classList.add("split"); strip.style.display = "none"; offer.style.display = "none"; state.responseOpen = true; }
+function openSplit() { content.classList.add("split"); strip.style.display = "none"; state.responseOpen = true; }
 function collapse() {
   content.classList.remove("split"); state.responseOpen = false;
   strip.style.display = "flex"; stripQ.textContent = "q=" + (state.cached ? "coffee (example)" : (state.ranQ || ""));
@@ -591,7 +588,6 @@ qInput.addEventListener("input", e => { state.q = e.target.value; syncViews(); }
 $("deviceSel").addEventListener("change", e => { state.device = e.target.value; syncViews(); });
 $("qMirror").addEventListener("click", () => qInput.focus());
 $("runBtn").addEventListener("click", run);
-$("peekLink").addEventListener("click", peek);
 $("collapseBtn").addEventListener("click", collapse);
 strip.addEventListener("click", openSplit);
 $("codeBtn").addEventListener("click", () => $("codePop").classList.toggle("open"));
