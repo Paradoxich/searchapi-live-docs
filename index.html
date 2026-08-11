@@ -98,8 +98,13 @@
   .nav-row:active { background: var(--btn); }
   .nav-row.active { background: var(--btn); font-weight: 500; cursor: pointer; }
   .badge { margin-left: auto; font-size: 10px; font-weight: 500; color: var(--green); background: rgba(74, 178, 104, 0.15); border-radius: 9px; padding: 2px 6px; }
-  .nav-row .chev { margin-left: auto; color: var(--text-quiet); transform: rotate(180deg); transition: transform .24s var(--ease); }
-  .nav-row.closed .chev { transform: none; }
+  /* A leading twisty reads as "this item contains items", where a trailing one
+     would rhyme with the group header above it */
+  /* The twisty sits in the indent the label already had, so every row label
+     still starts on the same line */
+  .nav-row.has-sub { padding-left: 2px; gap: 0; }
+  .nav-row .chev { width: 18px; height: 18px; color: var(--text-quiet); transition: transform .24s var(--ease); }
+  .nav-row.closed .chev { transform: rotate(-90deg); }
   .nav-sub { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .24s var(--ease), opacity .18s ease; }
   .nav-sub > .sub-inner { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: hidden; }
   .nav-sub.closed { grid-template-rows: 0fr; opacity: 0; }
@@ -264,7 +269,7 @@
         <div class="nav-group">
           <button class="nav-h"><span>Web search</span><svg class="ic chev-sm"><use href="#i-chevron"/></svg></button>
           <div class="group-items"><div class="group-inner">
-          <span class="nav-row active" id="googleRow" aria-current="page" aria-expanded="true">Google Search <svg class="ic chev"><use href="#i-chevron"/></svg></span>
+          <span class="nav-row active has-sub" id="googleRow" aria-current="page" aria-expanded="true"><svg class="ic chev"><use href="#i-chevron"/></svg>Google Search</span>
           <div class="nav-sub" id="googleSub"><div class="sub-inner">
             <span class="nav-row sub">Google Light</span>
             <span class="nav-row sub">Google Ads Advertiser Info</span>
