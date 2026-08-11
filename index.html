@@ -57,10 +57,9 @@
   .account { display: flex; align-items: center; gap: 12px; padding: 8px; }
   .account .mark { width: 29px; height: 25px; margin-left: 1px; color: #432dd7; }
   .brand { font-size: 14px; font-weight: 600; letter-spacing: -0.14px; color: var(--ink-strong); }
-  .nav { display: flex; flex-direction: column; padding: 0 8px 8px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #dededa transparent; }
-  .nav::-webkit-scrollbar { width: 4px; }
-  .nav::-webkit-scrollbar-thumb { background: #dededa; border-radius: 2px; }
-  .nav::-webkit-scrollbar-track { background: transparent; }
+  /* No scrollbar styling on purpose: any custom width or color opts out of
+     the OS overlay scrollbar, which then sits there permanently. */
+  .nav { display: flex; flex-direction: column; padding: 0 8px 8px; flex: 1; min-height: 0; overflow-y: auto; }
   /* Pinned above the scroll area so a 60-item catalog never scrolls its own search away */
   .nav-search { display: flex; align-items: center; gap: 8px; height: 36px; margin: 8px 8px 28px; padding: 0 8px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; flex-shrink: 0; cursor: text; }
   .nav-search:focus-within { border-color: var(--chip-border); }
@@ -768,8 +767,11 @@ function setCollapsed(g, on) {
 }
 groups.forEach(g => {
   setCollapsed(g, g.classList.contains("collapsed"));
-  g.querySelector(".nav-h").addEventListener("click", () =>
-    setCollapsed(g, !g.classList.contains("collapsed")));
+  g.querySelector(".nav-h").addEventListener("click", () => {
+    const opening = g.classList.contains("collapsed");
+    if (opening) groups.forEach(other => setCollapsed(other, true)); // one group at a time
+    setCollapsed(g, !opening);
+  });
 });
 
 /* Search and collapse would fight each other, so searching drives the
