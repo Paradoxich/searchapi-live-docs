@@ -221,10 +221,11 @@
   .panel-h .spacer { flex: 1; }
   .ph-right { display: flex; align-items: center; gap: 8px; }
   /* Words, not icons: the panel has room, and it stops the response actions
-     rhyming with the request bar's icon strip */
-  .ph-text { height: 28px; padding: 0 10px; border: none; border-radius: 7px; background: var(--btn); font-family: var(--sans); font-size: 12.5px; color: var(--text-mid); cursor: pointer; transition: background-color .14s ease, color .14s ease; }
-  .ph-text:hover { background: #e4e4dc; color: var(--ink); }
-  .ph-text[aria-pressed="true"] { background: var(--load-bg); color: var(--accent-2); }
+     rhyming with the request bar's icon strip. No fill either, so the panel
+     header stays quiet and the only filled button on the page is Run. */
+  .ph-text { height: 28px; padding: 0 4px; border: none; border-radius: 6px; background: none; font-family: var(--sans); font-size: 12.5px; color: var(--text-mid); cursor: pointer; transition: color .14s ease; }
+  .ph-text:hover { color: var(--ink); }
+  .ph-text[aria-pressed="true"] { color: var(--accent-2); }
   .json { font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--code-punct); padding: 14px 16px 16px; flex: 1; overflow: auto; }
   .json .k { color: var(--code-key); } .json .s { color: var(--code-str); } .json .n { color: var(--code-num); }
   .json .fold { cursor: pointer; user-select: none; }
