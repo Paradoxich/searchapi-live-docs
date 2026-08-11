@@ -48,6 +48,8 @@
     --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
     /* One curve for the whole sidebar: quick off the mark, soft landing */
     --ease: cubic-bezier(.32, .72, 0, 1);
+    /* Height of the sticky request band, so the response panel can sit under it */
+    --band: 89px;
   }
   @keyframes rowIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {
@@ -122,8 +124,12 @@
 
   .page { padding: 24px 24px 80px; }
 
+  /* The request zone is a sticky band, not a floating bar: content passes
+     under an edge instead of behind an object with no floor. */
+  .bar-wrap { position: sticky; top: 0; z-index: 20; margin: -24px -24px 0; padding: 24px 24px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+
   /* Bar — the page's one tinted element */
-  .bar { display: flex; align-items: center; gap: 8px; background: var(--bar-tint); border-radius: 8px; padding: 8px 8px 8px 14px; position: sticky; top: 8px; z-index: 20; }
+  .bar { position: relative; display: flex; align-items: center; gap: 8px; background: var(--bar-tint); border-radius: 8px; padding: 8px 8px 8px 14px; }
   .bar .verb { font-family: var(--mono); font-size: 11.5px; color: var(--verb); }
   .bar .url { flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--mono); font-size: 12px; color: var(--ink-strong); white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
   .bar .url::-webkit-scrollbar { display: none; }
@@ -197,8 +203,8 @@
   .load-btn:hover { background: rgba(89, 87, 214, 0.18); }
 
   /* Response panel (right column when split) */
-  .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: 68px; }
-  .content.split .panel { display: flex; flex-direction: column; height: calc(100vh - 80px); }
+  .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: calc(var(--band) + 16px); }
+  .content.split .panel { display: flex; flex-direction: column; height: calc(100vh - var(--band) - 32px); }
   .panel-h { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid var(--border); }
   .ph-left { display: flex; align-items: center; gap: 8px; }
   .seg { display: flex; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 8px; }
@@ -227,7 +233,7 @@
   .empty-btn:hover { background: rgba(89, 87, 214, 0.18); }
 
   /* Code popover — same surface language as the response panel */
-  .code-pop { display: none; position: absolute; right: 0; top: 52px; width: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0; z-index: 30; box-shadow: 0 12px 40px rgba(23,28,38,.14); }
+  .code-pop { display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0; z-index: 30; box-shadow: 0 12px 40px rgba(23,28,38,.14); }
   .code-pop.open { display: block; }
   .code-pop .ph { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding: 10px 14px; color: var(--ink-strong); font-size: 12px; font-weight: 500; }
   .code-pop .ph .spacer { flex: 1; }
@@ -235,7 +241,6 @@
   .code-pop .pop-copy { background: none; border: none; font-family: var(--sans); font-size: 11.5px; font-weight: 400; color: var(--text-2); cursor: pointer; padding: 0; }
   .code-pop pre { margin: 0; padding: 14px 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: var(--code-hint); overflow-x: auto; }
   .code-pop .lv { color: var(--accent); border-bottom: 1px solid var(--underline); }
-  .bar-wrap { position: relative; }
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 40; }
   .toast.show { opacity: 1; }
@@ -417,14 +422,14 @@
         <button class="run-btn" id="runBtn" aria-describedby="runsTip"><svg class="ic"><use href="#i-play"/></svg>Run</button>
         <span class="tip" id="runsTip" role="tooltip"><b id="runsLeft">4</b> live demo runs left</span>
       </div>
-    </div>
 
-    <div class="code-pop" id="codePop">
-      <div class="ph">Request <span class="spacer"></span>
-        <select><option>Python</option><option>Node</option><option>Ruby</option><option>cURL</option></select>
-        <button class="pop-copy" id="copyCode">Copy</button>
+      <div class="code-pop" id="codePop">
+        <div class="ph">Request <span class="spacer"></span>
+          <select><option>Python</option><option>Node</option><option>Ruby</option><option>cURL</option></select>
+          <button class="pop-copy" id="copyCode">Copy</button>
+        </div>
+        <pre id="codeBody"></pre>
       </div>
-      <pre id="codeBody"></pre>
     </div>
   </div>
 
