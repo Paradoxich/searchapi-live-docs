@@ -159,7 +159,7 @@
 
   /* Response panel (right column when split) */
   .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: 68px; }
-  .content.split .panel { display: block; }
+  .content.split .panel { display: flex; flex-direction: column; height: calc(100vh - 80px); }
   .panel-h { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid var(--border); }
   .ph-left { display: flex; align-items: center; gap: 8px; }
   .seg { display: flex; gap: 2px; padding: 2px; background: var(--surface-2); border-radius: 8px; }
@@ -172,7 +172,7 @@
   .ph-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 7px; background: var(--btn); color: #000; cursor: pointer; }
   .ph-btn.ghost { background: none; }
   .ph-btn:hover { background: #e4e4dc; }
-  .json { font-family: var(--mono); font-size: 11.5px; line-height: 1.75; color: var(--code-punct); padding: 14px 16px 16px; overflow-x: auto; }
+  .json { font-family: var(--mono); font-size: 11.5px; line-height: 1.75; color: var(--code-punct); padding: 14px 16px 16px; flex: 1; overflow: auto; }
   .json .k { color: var(--code-key); } .json .s { color: var(--code-str); } .json .n { color: var(--code-num); }
   .json .fold { cursor: pointer; user-select: none; }
   .json .hint { color: var(--code-hint); }
