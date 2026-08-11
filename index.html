@@ -114,20 +114,23 @@
   .content.split { grid-template-columns: 5fr 7fr; }
 
   /* Reference column */
-  .ref h2 { font-size: 17px; margin: 18px 0 4px; }
-  .group-h { font-size: 10.5px; letter-spacing: .06em; color: var(--light); font-weight: 600; margin: 22px 0 2px; text-transform: uppercase; }
-  .row { display: flex; align-items: center; gap: 18px; padding: 11px 2px; border-top: 1px solid var(--border); }
-  .row .name { font-family: var(--mono); font-size: 13px; width: 150px; flex-shrink: 0; }
-  .row .desc { flex: 1; font-size: 12.5px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ref h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.1; color: var(--ink-strong); margin: 20px 0 12px; }
+  .group-h { display: flex; align-items: center; height: 48px; padding: 16px 0 8px; margin: 0; font-size: 11px; font-weight: 500; color: var(--ink-strong); border-bottom: 1px solid var(--border); }
+  .row { display: flex; align-items: center; gap: 20px; height: 48px; padding: 0 4px; border-bottom: 1px solid var(--border); }
+  .row .name { font-family: var(--mono); font-size: 13px; letter-spacing: -0.13px; color: var(--ink); width: 120px; max-width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .name.muted { color: var(--mono-dim); }
+  .row .desc { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .content.split .row .desc { display: none; }
-  .content.split .row .name { flex: 1; }
-  .row .flag { font-size: 11px; color: var(--light); width: 110px; flex-shrink: 0; }
+  .content.split .row .name { flex: 1; width: auto; }
+  .row .flag { font-size: 11.5px; color: var(--text-quiet); width: 100px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .flag.req { color: var(--red); }
-  .row .ctl { width: 160px; flex-shrink: 0; display: flex; justify-content: flex-end; }
+  .row .ctl { width: 128px; flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; }
+  .row .ctl .none { font-size: 12px; color: var(--text-quiet); }
   .content.split .row .flag { width: auto; }
-  .pill { font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gray); cursor: pointer; font-family: var(--sans); }
-  .pill.set { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent); }
-  .pill.quiet { border: none; }
+  .pill { font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; font-family: var(--sans); }
+  .pill.set { background: var(--chip-bg); border-color: var(--chip-border); color: var(--accent-2); }
+  .pill.quiet { border: none; padding: 4px 0; }
+  .pill.muted { color: var(--text-quiet); }
   .row.dim { opacity: .55; }
   select.pill { appearance: none; }
 
@@ -298,12 +301,6 @@
       </div>
 
       <div class="group-h">Localization</div>
-      <div class="row dim">
-        <span class="name">google_domain</span>
-        <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
-        <span class="flag">deprecated</span>
-        <span class="ctl"><span style="color:var(--light);font-size:12px">—</span></span>
-      </div>
       <div class="row">
         <span class="name">gl</span>
         <span class="desc">Country of the search.</span>
@@ -316,8 +313,38 @@
         <span class="flag">optional · default</span>
         <span class="ctl"><button class="pill">en ▾</button></span>
       </div>
+      <div class="row">
+        <span class="name">lr</span>
+        <span class="desc">Restrict to document language(s), lang_XX, combinable with |.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+      <div class="row">
+        <span class="name">cr</span>
+        <span class="desc">Restrict to documents originating in a country.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+      <div class="row dim">
+        <span class="name">google_domain</span>
+        <span class="desc">ccTLDs phased out Apr 2025. Use gl / hl instead.</span>
+        <span class="flag">deprecated</span>
+        <span class="ctl"><span class="none">—</span></span>
+      </div>
 
       <div class="group-h">Filters</div>
+      <div class="row">
+        <span class="name">nfpr</span>
+        <span class="desc">Exclude auto-corrected (spelling) results.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">0 · include</button></span>
+      </div>
+      <div class="row">
+        <span class="name">filter</span>
+        <span class="desc">Duplicate Content and Host Crowding filters.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">1 · on</button></span>
+      </div>
       <div class="row">
         <span class="name">safe</span>
         <span class="desc">SafeSearch: active | blur | off.</span>
@@ -330,8 +357,54 @@
         <span class="flag">optional</span>
         <span class="ctl"><button class="pill quiet">+ set</button></span>
       </div>
+      <div class="row">
+        <span class="name">time_period_min</span>
+        <span class="desc">Custom start, MM/DD/YYYY.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+      <div class="row">
+        <span class="name">time_period_max</span>
+        <span class="desc">Custom end, MM/DD/YYYY.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
+      <div class="row">
+        <span class="name">verbatim</span>
+        <span class="desc">Exact keywords only. Stricter than nfpr.</span>
+        <span class="flag">optional</span>
+        <span class="ctl"><button class="pill quiet">+ set</button></span>
+      </div>
 
-      <div class="group-h" style="color:#bbb">… remaining groups as in the full design</div>
+      <div class="group-h">Pagination</div>
+      <div class="row">
+        <span class="name">page</span>
+        <span class="desc">Which page of results.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">1</button></span>
+      </div>
+      <div class="row dim">
+        <span class="name muted">num</span>
+        <span class="desc">Fixed by Google since Sep 2025. Rank Tracking API for num=100.</span>
+        <span class="flag">constant</span>
+        <span class="ctl"><button class="pill muted">10</button></span>
+      </div>
+
+      <div class="group-h">Optimization</div>
+      <div class="row">
+        <span class="name">optimization_strategy</span>
+        <span class="desc">performance | ads.</span>
+        <span class="flag">optional · default</span>
+        <span class="ctl"><button class="pill">performance ▾</button></span>
+      </div>
+
+      <div class="group-h">Zero data retention</div>
+      <div class="row">
+        <span class="name muted">zero_retention</span>
+        <span class="desc">No logging or storage of parameters, HTML, or JSON.</span>
+        <span class="flag">Enterprise only</span>
+        <span class="ctl"><button class="pill">🔒 Enterprise</button></span>
+      </div>
     </div>
 
     <!-- Response panel: right column when split -->
