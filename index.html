@@ -663,7 +663,6 @@
         <span class="chip live" id="panelChip">200 OK · 0.8s</span>
         <span class="spacer"></span>
         <div class="ph-right">
-          <button class="ph-text" id="copyJson">Copy</button>
           <button class="ph-text" id="expandBtn" aria-label="Expand response to full width" aria-pressed="false">Expand</button>
         </div>
       </div>
@@ -831,7 +830,6 @@ $("copyBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(url); toast("Copied with a YOUR_API_KEY placeholder");
 });
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
-$("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($("jsonBody").innerText); toast("JSON copied"); });
 
 /* Sidebar: cmd/ctrl+K focuses search, typing filters the catalog live.
    Only Google Search has a page; other rows say so. */
