@@ -72,6 +72,12 @@
   .nav-row:hover { background: var(--surface-2); }
   .nav-row.active { background: var(--surface-2); font-weight: 500; cursor: default; }
   .badge { margin-left: auto; font-size: 10px; font-weight: 500; color: var(--green); background: rgba(74, 178, 104, 0.15); border-radius: 9px; padding: 2px 6px; }
+  .nav-row .chev { margin-left: auto; font-size: 10px; color: var(--text-quiet); transition: transform .15s ease; }
+  .nav-row.closed .chev { transform: rotate(-90deg); }
+  .nav-row.active { cursor: pointer; }
+  .nav-sub { display: flex; flex-direction: column; gap: 2px; }
+  .nav-sub.closed { display: none; }
+  .nav-row.sub { padding-left: 30px; }
 
   .title-bar { display: flex; align-items: center; gap: 20px; padding: 24px; border-bottom: 1px solid var(--border); }
   .title-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -218,7 +224,14 @@
       <div class="nav-list" id="navList">
         <div class="nav-group">
           <div class="nav-h">Web search</div>
-          <span class="nav-row active" aria-current="page">Google Search</span>
+          <span class="nav-row active" id="googleRow" aria-current="page" aria-expanded="true">Google Search <span class="chev">▾</span></span>
+          <div class="nav-sub" id="googleSub">
+            <span class="nav-row sub">Google Light</span>
+            <span class="nav-row sub">Google Ads Advertiser Info</span>
+            <span class="nav-row sub">Google AI Overview</span>
+            <span class="nav-row sub">Google Related Questions</span>
+            <span class="nav-row sub">Google About This Domain</span>
+          </div>
           <span class="nav-row">Google AI Mode</span>
           <span class="nav-row">Google Autocomplete</span>
           <span class="nav-row">Google Rank Tracking <span class="badge">New</span></span>
@@ -693,8 +706,19 @@ $("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($(
 /* Sidebar: cmd/ctrl+K focuses search, typing filters the catalog live.
    Only Google Search has a page; other rows say so. */
 const navSearch = $("navSearch");
+const googleRow = $("googleRow"), googleSub = $("googleSub");
+googleRow.addEventListener("click", () => {
+  const closed = googleSub.classList.toggle("closed");
+  googleRow.classList.toggle("closed", closed);
+  googleRow.setAttribute("aria-expanded", String(!closed));
+});
 function filterNav() {
   const t = navSearch.value.trim().toLowerCase();
+  if (t) { // searching reveals nested rows even when collapsed
+    googleSub.classList.remove("closed");
+    googleRow.classList.remove("closed");
+    googleRow.setAttribute("aria-expanded", "true");
+  }
   document.querySelectorAll(".nav-group").forEach(g => {
     let any = false;
     g.querySelectorAll(".nav-row").forEach(r => {
