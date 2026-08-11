@@ -46,14 +46,6 @@
     --code-hint: #474b57;
     --sans: Inter, system-ui, sans-serif;
     --mono: "Roboto Mono", ui-monospace, Menlo, monospace;
-    /* legacy names, retired section by section as the restyle lands */
-    --gray: var(--text-2);
-    --light: var(--text-quiet);
-    --accent-soft: var(--chip-bg);
-    --accent-border: var(--chip-border);
-    --tint: var(--bar-tint);
-    --green-bg: var(--bg); --green-fg: var(--green);
-    --amber-bg: var(--bg); --amber-fg: var(--amber);
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: var(--sans); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
@@ -133,6 +125,22 @@
   .pill.muted { color: var(--text-quiet); }
   .row.dim { opacity: .55; }
   select.pill { appearance: none; }
+
+  /* Examples */
+  .examples { margin-top: 64px; }
+  .examples h2 { margin: 0 0 24px; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .content.split .cards { grid-template-columns: 1fr; }
+  .card { display: flex; flex-direction: column; gap: 32px; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-body { display: flex; flex-direction: column; gap: 16px; }
+  .card h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+  .card .card-desc { margin: 0; font-size: 13px; line-height: 1.3; color: var(--text-3); }
+  .card-params { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cp { background: var(--surface); border-radius: 5px; padding: 3px 4px; font-family: var(--mono); font-size: 11px; color: var(--text-3); white-space: nowrap; }
+  .card-actions { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+  .view-response { font-size: 11.5px; color: var(--text-quiet); text-decoration: underline; cursor: pointer; }
+  .load-btn { display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 8px; background: var(--load-bg); border: none; border-radius: 8px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--accent-2); cursor: pointer; }
+  .load-btn:hover { background: rgba(89, 87, 214, 0.18); }
 
   /* Response panel (right column when split) */
   .panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; position: sticky; top: 68px; }
@@ -406,6 +414,45 @@
         <span class="flag">Enterprise only</span>
         <span class="ctl"><button class="pill">🔒 Enterprise</button></span>
       </div>
+
+      <section class="examples">
+        <h2>Examples</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-body">
+              <h3>Search with local results</h3>
+              <p class="card-desc">A query with a location set, returning the local map pack and place listings.</p>
+              <div class="card-params"><span class="cp">q: "coffee"</span><span class="cp">location: Austin, Texas</span></div>
+            </div>
+            <div class="card-actions">
+              <a class="view-response">View response</a>
+              <button class="load-btn" data-q="coffee">Load into request <svg class="ic"><use href="#i-arrow-up"/></svg></button>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-body">
+              <h3>News from the last hour</h3>
+              <p class="card-desc">Time-restricted search returning only the freshest results.</p>
+              <div class="card-params"><span class="cp">q: "openai"</span><span class="cp">time_period: last_hour</span></div>
+            </div>
+            <div class="card-actions">
+              <a class="view-response">View response</a>
+              <button class="load-btn" data-q="openai">Load into request <svg class="ic"><use href="#i-arrow-up"/></svg></button>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-body">
+              <h3>Exact match on one site</h3>
+              <p class="card-desc">Verbatim search scoped to a single domain with operators.</p>
+              <div class="card-params"><span class="cp">q: "rag site:arxiv.org"</span><span class="cp">verbatim: true</span></div>
+            </div>
+            <div class="card-actions">
+              <a class="view-response">View response</a>
+              <button class="load-btn" data-q="rag site:arxiv.org">Load into request <svg class="ic"><use href="#i-arrow-up"/></svg></button>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
 
     <!-- Response panel: right column when split -->
@@ -555,6 +602,17 @@ $("copyBtn").addEventListener("click", () => {
 });
 $("copyCode").addEventListener("click", () => { navigator.clipboard.writeText($("codeBody").innerText); toast("Code copied"); });
 $("copyJson").addEventListener("click", () => { navigator.clipboard.writeText($("jsonBody").innerText); toast("JSON copied"); });
+
+/* Example cards: "View response" shows the cached example, "Load into
+   request" only fills q in the bar — same path as typing it. */
+document.querySelectorAll(".view-response").forEach(a => a.addEventListener("click", peek));
+document.querySelectorAll(".load-btn").forEach(b => b.addEventListener("click", () => {
+  qInput.value = b.dataset.q;
+  state.q = b.dataset.q;
+  syncViews();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  qInput.focus({ preventScroll: true });
+}));
 
 syncViews();
 </script>
