@@ -1190,6 +1190,13 @@ document.addEventListener("keydown", e => {
 document.querySelectorAll(".nav-row:not(.active)").forEach(r =>
   r.addEventListener("click", () => toast("Only Google Search is built in this prototype")));
 
+/* Same rule for the row controls: q and device work, the rest say so on hover
+   and on click, in the sidebar's words. */
+document.querySelectorAll(".ctl button:not(#qMirror)").forEach(b => {
+  b.title = "Only q and device are wired in this prototype";
+  b.addEventListener("click", () => toast("Only q and device are wired in this prototype"));
+});
+
 /* Example cards: "View response" shows that card's cached response, "Load into
    request" only fills q in the bar — same path as typing it. Both read the one
    query on the card, so a card can never show a response it did not advertise. */
