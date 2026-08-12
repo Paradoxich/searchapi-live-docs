@@ -350,6 +350,13 @@
     .row .ctl { width: auto; }
     .cards { grid-template-columns: 1fr; }
     .code-pop { width: calc(100vw - 32px); }
+    /* The bar earns its width back: the static prefix folds to an ellipsis
+       (the full URL lives one tap away behind copy and the code popover)
+       and the buttons drop to 28px */
+    .url-prefix { display: none; }
+    .url::before { content: "…q="; }
+    .icon-btn { width: 28px; height: 28px; }
+    .run-btn { height: 28px; padding: 0 10px; font-size: 13px; }
   }
 </style>
 </head>
@@ -520,7 +527,7 @@
   <div class="bar-wrap">
     <div class="bar">
       <span class="verb">GET</span>
-      <span class="url">/api/v1/search?engine=google&amp;q=<input id="q" class="q-input" placeholder="try your own query" size="18" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span id="extraParams" class="extra-param"></span></span>
+      <span class="url"><span class="url-prefix">/api/v1/search?engine=google&amp;q=</span><input id="q" class="q-input" placeholder="try your own query" size="18" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><span id="extraParams" class="extra-param"></span></span>
       <button class="icon-btn" id="codeBtn" title="View code" aria-label="View code"><svg class="ic"><use href="#i-code"/></svg></button>
       <button class="icon-btn" id="copyBtn" title="Copy request" aria-label="Copy request"><svg class="ic"><use href="#i-copy"/></svg></button>
       <div class="run-wrap">
