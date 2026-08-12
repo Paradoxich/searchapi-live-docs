@@ -235,7 +235,10 @@
   .row .ctl { width: 128px; margin-left: auto; flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; }
   .row .ctl .none { font-size: 12px; color: var(--text-quiet); }
   .pill { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: var(--sans); }
-  .pill.set { background: var(--chip-bg); border-color: var(--chip-border); color: var(--accent-2); }
+  .pill.set { background: var(--chip-bg); border-color: var(--chip-border); color: var(--accent-2); transition: border-color .14s ease; }
+  .pill.set:hover { border-color: var(--accent-2); }
+  select.pill { transition: border-color .14s ease; }
+  select.pill:hover { border-color: var(--text-quiet); }
   .pill.quiet { border: none; background: none; padding: 4px 0; }
   .pill .ic { width: 12px; height: 12px; }
   .pill.muted { color: var(--text-quiet); }
