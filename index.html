@@ -322,6 +322,33 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12.5px; padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 40; }
   .toast.show { opacity: 1; }
+
+  /* ===== Mobile: one query, stacking the split =====
+     The catalog steps aside, the response stacks under the bar with the docs
+     continuing beneath it, and rows drop their preview line the same way the
+     desktop split does. */
+  @media (max-width: 800px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .title-bar, .page { padding-left: 16px; padding-right: 16px; }
+    .bar-wrap { margin: -24px -16px 0; padding: 16px; }
+    .content, .content.split, .content.split.full { grid-template-columns: 1fr; }
+    /* The response takes the row above the docs; 60vh leaves the params
+       showing underneath, which is the whole argument on one screen */
+    .panel { position: static; order: -1; }
+    .content.split .panel { height: 60vh; }
+    .content.split .ref { height: auto; }
+    .content.split.full .ref { height: 0; }
+    .row .desc { display: none; }
+    /* Desktop's fixed columns are for cross-row alignment; at this width the
+       rows size to their content and the flag gives way first */
+    .row { gap: 12px; }
+    .row .name { width: auto; min-width: 0; flex-shrink: 1; }
+    .row .flag { width: auto; min-width: 0; flex-shrink: 1; }
+    .row .ctl { width: auto; }
+    .cards { grid-template-columns: 1fr; }
+    .code-pop { width: calc(100vw - 32px); }
+  }
 </style>
 </head>
 <body>
