@@ -328,11 +328,13 @@
      continuing beneath it, and rows drop their preview line the same way the
      desktop split does. */
   @media (max-width: 800px) {
-    .app { grid-template-columns: 1fr; }
+    /* minmax(0), not bare 1fr: a fr track refuses to shrink below its
+       content's min width, which is how the page overflowed phones */
+    .app { grid-template-columns: minmax(0, 1fr); }
     .sidebar { display: none; }
     .title-bar, .page { padding-left: 16px; padding-right: 16px; }
     .bar-wrap { margin: -24px -16px 0; padding: 16px; }
-    .content, .content.split, .content.split.full { grid-template-columns: 1fr; }
+    .content, .content.split, .content.split.full { grid-template-columns: minmax(0, 1fr); }
     /* The response takes the row above the docs; 60vh leaves the params
        showing underneath, which is the whole argument on one screen */
     .panel { position: static; order: -1; }
