@@ -142,7 +142,9 @@
   .bar .verb { font-family: var(--mono); font-size: 11.5px; color: var(--verb); }
   .bar .url { flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--mono); font-size: 12px; color: var(--ink-strong); white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
   .bar .url::-webkit-scrollbar { display: none; }
-  .bar .url .q-input { font-family: var(--mono); font-size: 12px; color: var(--accent); background: transparent; border: none; border-bottom: 1.5px solid var(--underline); outline: none; padding: 0 1px 1px; min-width: 40px; }
+  .bar .url .q-input { font-family: var(--mono); font-size: 12px; color: var(--accent); background: transparent; border: none; border-bottom: 1.5px solid var(--underline); outline: none; padding: 0 1px 1px; min-width: 40px; border-radius: 3px 3px 0 0; transition: background-color .14s ease, border-color .14s ease; }
+  /* Focus fills the slot, so landing here from the q row is visible at a glance */
+  .bar .url .q-input:focus { background: var(--chip-bg); border-bottom-color: var(--accent); }
   .bar .url .q-input::placeholder { color: var(--accent); opacity: 1; }
   .bar .url .extra-param { color: var(--accent); }
   .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 8px; border: none; background: rgba(255,255,255,.5); cursor: pointer; color: #000; }
